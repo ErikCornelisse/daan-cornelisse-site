@@ -199,3 +199,65 @@ def test_new_topic_goes_to_the_chosen_section(app):
     response = client.post("/werken/nieuw", data=form, files=files, follow_redirects=False)
     assert response.status_code == 303
     assert layout.find(structure(site), "over-mij")["topics"] == ["lijnen"]
+
+
+# Band colours --------------------------------------------------------------
+
+
+def test_a_forced_band_restarts_the_alternation(app):
+    main, _, _ = app
+    data = copy.deepcopy(STRUCTURE)
+    layout.set_band(data, "mediums", "paper")
+    bands = main.content.bands(data)
+    assert [bands[f"topic:{t}"] for t in layout.find(data, "mediums")["topics"]] == [
+        "paper",
+        "cream",
+        "paper",
+    ]
+    assert bands["section:over-mij"] == "cream" and bands["section:contact"] == "paper"
+
+
+def test_set_band_rules(data):
+    layout.set_band(data, "contact", "paper")
+    assert layout.find(data, "contact")["band"] == "paper"
+    layout.set_band(data, "contact", "")
+    assert "band" not in layout.find(data, "contact")
+    with pytest.raises(layout.LayoutError):
+        layout.set_band(data, "hero", "cream")
+    with pytest.raises(layout.LayoutError):
+        layout.set_band(data, "contact", "blue")
+
+
+def test_a_move_that_makes_a_title_unreadable_is_refused(app):
+    _, client, site = app
+    before = (site / "src/content/page.json").read_text()
+    response = client.post("/indeling/sectie/over-mij/omhoog", follow_redirects=False)
+    location = response.headers["location"]
+    assert "fout=" in location and "leesbaar" in client.get(location).text
+    assert (site / "src/content/page.json").read_text() == before
+
+
+def test_forcing_a_band_makes_the_move_possible(app):
+    _, client, site = app
+    client.post("/indeling/sectie/mediums/achtergrond", data={"band": "cream"})
+    response = client.post("/indeling/sectie/over-mij/omhoog", follow_redirects=False)
+    assert "fout=" not in response.headers["location"]
+    data = structure(site)
+    assert ids(data) == ["hero", "over-mij", "mediums", "contact"]
+    assert layout.find(data, "mediums")["band"] == "cream"
+
+
+def test_a_band_that_makes_a_title_unreadable_is_refused(app):
+    _, client, site = app
+    response = client.post(
+        "/indeling/sectie/mediums/achtergrond", data={"band": "paper"}, follow_redirects=False
+    )
+    assert "fout=" in response.headers["location"]
+    assert "band" not in layout.find(structure(site), "mediums")
+
+
+def test_layout_screen_shows_fixed_bands_only_when_set(app):
+    _, client, _ = app
+    assert "achtergrond vast" not in client.get("/indeling").text
+    client.post("/indeling/sectie/contact/achtergrond", data={"band": "cream"})
+    assert client.get("/indeling").text.count("achtergrond vast") == 1

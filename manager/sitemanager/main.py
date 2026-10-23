@@ -475,11 +475,11 @@ def layout_view() -> dict:
             {
                 **section,
                 **label("sections", section["id"]),
-                "band": bands.get(f"section:{section['id']}"),
+                "colour": bands.get(f"section:{section['id']}"),
                 "first": index == 1,
                 "last": index == len(layout.sections(data)) - 2,
                 "topics": [
-                    {"id": t, **label("topics", t), "band": bands.get(f"topic:{t}")}
+                    {"id": t, **label("topics", t), "colour": bands.get(f"topic:{t}")}
                     for t in section.get("topics", [])
                 ],
             }
@@ -512,11 +512,23 @@ def change_layout(change, message: str) -> RedirectResponse:
         result = change(data)
     except layout.LayoutError as error:
         return RedirectResponse(f"/indeling?fout={quote(str(error))}", status_code=303)
-    problems = layout.check(data)
+    problems = layout.check(data) or unreadable_titles(data)
     if problems:
         return RedirectResponse(f"/indeling?fout={quote(problems[0])}", status_code=303)
     content.write_structure(data)
     return redirect("/indeling", message(result) if callable(message) else message)
+
+
+def unreadable_titles(structure: dict) -> list[str]:
+    """Work titles that a layout change would put on a band where they are too faint."""
+    checks = style.contrast_checks(style_files.read(), works_on_bands(structure))
+    failing = [c for c in checks if not c.ok and c.label.startswith("Titel")]
+    return [
+        f"Dan wordt de {c.label[0].lower()}{c.label[1:]} te slecht leesbaar"
+        f" ({c.ratio:.1f}:1, minimaal {c.minimum:g}:1). Zet de achtergrond van een sectie vast"
+        " of kies voor dat werk een andere accentkleur."
+        for c in failing
+    ]
 
 
 @app.post("/indeling/sectie/{section_id}/{action}")
@@ -531,6 +543,15 @@ async def section_action(request: Request, section_id: str, action: str):
             lambda d: layout.toggle_menu(d, section_id),
             lambda on: "In het menu gezet." if on else "Uit het menu gehaald.",
         )
+    if action == "achtergrond":
+        band = str(form.get("band", ""))
+        labels = {"cream": "crème", "paper": "papier"}
+        message = (
+            f"Achtergrond vastgezet op {labels[band]}."
+            if band in labels
+            else "Achtergrond automatisch."
+        )
+        return change_layout(lambda d: layout.set_band(d, section_id, band), message)
     if action == "verwijderen":
         target = str(form.get("topics_to", "")) or None
 
@@ -663,9 +684,9 @@ async def save_contact(request: Request):
 # Style ---------------------------------------------------------------------
 
 
-def works_on_bands() -> list[tuple[str, str, str]]:
+def works_on_bands(structure: dict | None = None) -> list[tuple[str, str, str]]:
     """(title, accent, band) for each topic on the page, with the band it sits on."""
-    bands = content.bands()
+    bands = content.bands(structure)
     result = []
     for topic_id, pair in zip(content.topic_ids(), content.topics()):
         entry = pair["nl"] or pair["en"]

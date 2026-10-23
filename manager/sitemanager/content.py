@@ -138,21 +138,25 @@ class SiteContent:
             if path.exists():
                 path.unlink()
 
-    def bands(self) -> dict[str, str]:
+    def bands(self, structure: dict | None = None) -> dict[str, str]:
         """Band colour per section ('section:<id>') and per topic ('topic:<id>'), as on the site.
 
-        Mirrors loadPage() in src/lib/page.ts: bands alternate from the first band after
-        the hero; a section without own text puts its heading in its first topic's band.
+        Mirrors loadPage() in src/lib/page.ts: each band takes the other colour than the
+        one before it, starting with cream after the hero; a section may force its colour,
+        and the bands after it alternate from there. A section without own text puts its
+        heading in its first topic's band. Pass `structure` to see the bands of a changed
+        structure before it is saved.
         """
-        result, index = {}, 0
+        result, previous = {}, None
 
         def next_band(forced: str | None = None) -> str:
-            nonlocal index
-            band = forced or ("paper" if index % 2 else "cream")
-            index += 1
+            nonlocal previous
+            band = forced or ("paper" if previous == "cream" else "cream")
+            previous = band
             return band
 
-        for section in self.sections():
+        sections = (structure or self.read_structure())["sections"]
+        for section in sections:
             if section["type"] == "hero":
                 continue
             topics = section.get("topics", [])

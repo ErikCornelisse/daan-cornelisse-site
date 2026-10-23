@@ -33,7 +33,7 @@ text falls back to the Dutch one.
 | 1 | Content-driven page | `page.json`, `sections` and `topics` collections, rules checked at build time, page/menu/bands rendered from them; manager reads the new layout | — | done |
 | 2 | Page layout in the manager | Pagina-indeling: reorder, add, remove sections, menu toggle; reorder and move topics | 1 | done |
 | 3 | Section editors | Editors for section (own text, image, subheadings), hero (photo upload, focal point, link target) and contact | 2 | done |
-| 4 | Bands from the structure | Stijl contrast check reads bands from `page.json`; optional band override per section | 2 | todo |
+| 4 | Bands from the structure | Stijl contrast check reads bands from `page.json`; optional band override per section | 2 | done |
 
 Status: `todo` → `in-progress` → `done`. This table is the source of truth
 for progress.
@@ -86,8 +86,20 @@ section or contact leaves its files identical. In the browser, a focal
 point set by clicking and the portrait moved to the right showed in the
 preview and built; both test edits were undone.
 
-## Phase 4
-Detailed when phase 3 is done.
+## Phase 4 — Bands from the structure
+
+- [x] Bands take the other colour than the band before them (cream first); a section's forced colour (`"band"` in `page.json`) restarts the alternation from there — site (`src/lib/page.ts`) and manager (`content.bands()`) alike — _done when:_ the built page is unchanged without overrides
+- [x] Pagina-indeling: *Achtergrond: automatisch / crème / papier* per section (not the hero), shown as "achtergrond vast"
+- [x] Contrast guard: a layout change (moving, adding, removing, fixing a colour) that would put a work title on a band where it is below 3:1 is refused, with a hint to fix a section's background or choose another accent colour
+- [x] The Stijl contrast check uses the same bands
+
+**Result (2026-10-23):** 78 manager tests pass. Moving *Over mij* above
+*Mediums en Disciplines* is refused (the purple title would get 2.4:1 on
+paper) until *Mediums en Disciplines* is fixed to cream; then the move
+works, the preview and the build show the expected bands, and both changes
+were undone.
+
+All four steps of this plan are done.
 
 ## Open questions
 None yet.

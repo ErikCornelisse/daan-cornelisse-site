@@ -9,6 +9,7 @@ the manager saves always builds. Keep the two in step.
 import re
 
 FIXED = ("hero", "contact")  # types that cannot be moved or removed
+BANDS = ("cream", "paper")
 ID = re.compile(r"^[a-z0-9-]+$")
 
 
@@ -59,6 +60,9 @@ def check(data: dict) -> list[str]:
     for section in items:
         if section.get("type") in FIXED and section.get("topics"):
             errors.append("Het openingsbeeld en de contactsectie kunnen geen onderwerpen bevatten.")
+    for section in items:
+        if "band" in section and (section.get("type") == "hero" or section["band"] not in BANDS):
+            errors.append(f"Ongeldige achtergrondkleur bij “{section.get('id')}”.")
     link = items[0].get("link") if items else None
     if link and (link not in ids or link == items[0].get("id")):
         errors.append("De link in het openingsbeeld wijst naar een sectie die niet bestaat.")
@@ -93,6 +97,19 @@ def toggle_menu(data: dict, section_id: str) -> bool:
     if not section["menu"]:
         section.pop("menu")
     return section.get("menu", False)
+
+
+def set_band(data: dict, section_id: str, band: str) -> None:
+    """Force a section's background colour ('cream' or 'paper'), or '' for automatic."""
+    section = find(data, section_id)
+    if section["type"] == "hero":
+        raise LayoutError("Het openingsbeeld heeft geen achtergrondkleur.")
+    if band and band not in BANDS:
+        raise LayoutError("Kies crème, papier of automatisch.")
+    if band:
+        section["band"] = band
+    else:
+        section.pop("band", None)
 
 
 def add_section(data: dict, section_id: str) -> None:

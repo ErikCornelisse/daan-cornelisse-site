@@ -18,7 +18,9 @@
 	<a href="{{ preview_url }}" target="_blank" rel="noopener">Bekijk in voorbeeld</a>
 </div>
 <p class="hint">De volgorde van boven naar beneden is de volgorde op de site. Het openingsbeeld staat altijd bovenaan
-	en de contactsectie altijd onderaan. De bolletjes tonen de achtergrondkleur die elk deel krijgt.
+	en de contactsectie altijd onderaan. De bolletjes tonen de achtergrondkleur die elk deel krijgt: steeds
+	afwisselend, tenzij je die bij een sectie vastzet; de delen erna wisselen dan vanaf die kleur af. Een wijziging die
+	een titel slecht leesbaar maakt, wordt niet doorgevoerd.
 	Wijzigingen gaan pas online bij <a href="/publiceren">Publiceren</a>.</p>
 
 <ol class="layout">
@@ -26,13 +28,14 @@
 	<li class="layout-section{% if section.type in ('hero', 'contact') %} layout-section--fixed{% endif %}">
 		<div class="layout-section__head">
 			<div>
-				{{ band_dot(section.band) }}
+				{{ band_dot(section.colour) }}
 				<strong>{{ section.title }}</strong>
 				<span class="hint">
 					{% if section.type == 'hero' %}openingsbeeld · staat vast
 					{% elif section.type == 'contact' %}contact · staat vast
 					{% else %}sectie{% endif %}
 					{% if section.menu %} · in het menu{% endif %}
+					{% if section.get('band') %} · achtergrond vast{% endif %}
 				</span>
 				{% if section.missing_en %}<span class="badge">Engels ontbreekt</span>{% endif %}
 			</div>
@@ -44,6 +47,14 @@
 				{% endif %}
 				{% if section.type != 'hero' %}
 				{{ button('/indeling/sectie/' ~ section.id ~ '/menu', 'Uit menu' if section.menu else 'In menu') }}
+				<form method="post" action="/indeling/sectie/{{ section.id }}/achtergrond" class="inline">
+					<select name="band" aria-label="Achtergrond van {{ section.title }}">
+						<option value="" {% if not section.get('band') %}selected{% endif %}>Achtergrond: automatisch</option>
+						<option value="cream" {% if section.get('band') == 'cream' %}selected{% endif %}>Achtergrond: crème</option>
+						<option value="paper" {% if section.get('band') == 'paper' %}selected{% endif %}>Achtergrond: papier</option>
+					</select>
+					<button class="small">Zetten</button>
+				</form>
 				{% endif %}
 			</div>
 		</div>
@@ -66,7 +77,7 @@
 		<ol class="layout-topics">
 			{% for topic in section.topics %}
 			<li>
-				<div>{{ band_dot(topic.band) }} {{ topic.title }}
+				<div>{{ band_dot(topic.colour) }} {{ topic.title }}
 					{% if topic.missing_en %}<span class="badge">Engels ontbreekt</span>{% endif %}</div>
 				<div class="layout-actions">
 					<a class="button small secondary" href="/werken/{{ topic.id }}">Bewerken</a>

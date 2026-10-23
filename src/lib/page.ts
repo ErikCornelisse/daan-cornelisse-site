@@ -90,12 +90,16 @@ async function pick<C extends 'sections' | 'topics'>(collection: C, entryId: str
 	throw new Error(`Missing src/content/${collection}/nl/${entryId}.md (listed in src/content/page.json)`);
 }
 
-/** Bands alternate from the first band after the hero; a section may force its own. */
+/**
+ * Each band takes the other colour than the band before it, starting with cream
+ * after the hero. A section may force its colour ("band" in page.json); the
+ * bands after it then alternate from that colour.
+ */
 function bandCounter() {
-	let index = 0;
+	let previous: Band | undefined;
 	return (forced?: Band): Band => {
-		const band = forced ?? (index % 2 ? 'paper' : 'cream');
-		index += 1;
+		const band = forced ?? (previous === 'cream' ? 'paper' : 'cream');
+		previous = band;
 		return band;
 	};
 }

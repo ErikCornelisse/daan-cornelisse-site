@@ -24,7 +24,7 @@ dependencies installed (`npm install` in the repository root) for the preview.
 | Screen | Edits |
 |---|---|
 | Overzicht | Lists works and pages per language, starts/stops the preview, shows unpublished changes |
-| Pagina-indeling | The structure of the landing page (`page.json`): sections up/down, add, remove, in/out of the menu, the hero's link target; topics up/down, to another section, off the page and back, delete; band colour per part. Hero and contact are locked. Changes that break the rules of `src/lib/page.ts` are refused |
+| Pagina-indeling | The structure of the landing page (`page.json`): sections up/down, add, remove, in/out of the menu, the hero's link target; topics up/down, to another section, off the page and back, delete; band colour per part, which a section can fix to cream or paper (the parts after it alternate from there). Hero and contact are locked. Changes that break the rules of `src/lib/page.ts`, or that would make a work title too faint on its band, are refused |
 | Werken | Topics (today the works): accent colour, 1–2 images (upload, replace, remove, alt text per language), and title, discipline, quote and text in Dutch and English side by side; "Nieuw werk" adds one at the end of the first section with works |
 | Secties (via Pagina-indeling › Bewerken) | Hero: titles, link text and target, photo with click-to-set focal point and optional phone crop. Section: heading, anchor, menu label, own text with `###` subheadings, image left or right. Contact: heading, anchor, menu label, intro text. Dutch and English side by side; images shared, descriptions per language |
 | Privacyverklaring | Title and text in both languages |
