@@ -55,5 +55,5 @@ for progress.
    messages. Needed for phase 6; the form can ship disabled until then.
 3. Who writes the English texts: Daan, or Claude drafts and Daan checks.
 4. Daan's e-mail address and Instagram, YouTube and LinkedIn URLs (placeholders until known).
-5. Daan's mijndomein package: web hosting with SFTP/FTP access? Needed for phase 8.
+5. ~~Daan's mijndomein package.~~ Resolved: Plesk Linux web hosting at mijndomein for `daniel-cornelisse.nl`, currently serving a static site; see [current site](../analysis/current-site-20261023.md). Login details still needed for step 8.
 6. Permission for the MAX/EpilepsieNL TV still, or a replacement image.
