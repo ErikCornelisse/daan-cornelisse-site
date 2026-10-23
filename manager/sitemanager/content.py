@@ -114,15 +114,29 @@ class SiteContent:
         """Each topic as {'nl': Entry|None, 'en': Entry|None}, in page order."""
         return [{lang: self.get("topics", lang, t) for lang in LANGS} for t in self.topic_ids()]
 
-    def place_topic(self, topic_id: str) -> None:
-        """Add a new topic at the end of the first section that holds topics."""
-        data = self.read_structure()
-        sections = [s for s in data["sections"] if s["type"] == "section"]
+    def default_topic_section(self) -> str | None:
+        """Where a new topic goes when no section is chosen: the first section with topics."""
+        sections = [s for s in self.sections() if s["type"] == "section"]
         target = next((s for s in sections if s.get("topics")), sections[0] if sections else None)
-        if target is None:
-            raise ValueError("Er is geen sectie om het onderwerp in te plaatsen.")
-        target.setdefault("topics", []).append(topic_id)
+        return target["id"] if target else None
+
+    def place_topic(self, topic_id: str, section_id: str | None = None) -> None:
+        """Add a topic at the end of a section (default: the first section with topics)."""
+        from .layout import LayoutError, place_topic
+
+        section_id = section_id or self.default_topic_section()
+        if section_id is None:
+            raise LayoutError("Er is geen sectie om het onderwerp in te plaatsen.")
+        data = self.read_structure()
+        place_topic(data, topic_id, section_id)
         self.write_structure(data)
+
+    def delete(self, collection: str, slug: str) -> None:
+        """Remove an entry in both languages (undoable until publishing)."""
+        for lang in LANGS:
+            path = self.path_for(collection, lang, slug)
+            if path.exists():
+                path.unlink()
 
     def bands(self) -> dict[str, str]:
         """Band colour per section ('section:<id>') and per topic ('topic:<id>'), as on the site.

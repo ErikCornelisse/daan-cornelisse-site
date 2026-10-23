@@ -8,6 +8,7 @@
 </div>
 
 <form method="post" enctype="multipart/form-data" action="{{ '/werken/' ~ slug if slug else '/werken/nieuw' }}" class="stack">
+	{% if not slug %}<input type="hidden" name="section" value="{{ section }}">{% endif %}
 	<section class="card">
 		<h2>Algemeen</h2>
 		<div class="row">
@@ -19,7 +20,7 @@
 				</select>
 			</label>
 			<p class="hint">De plaats op de pagina (sectie en volgorde) staat in de pagina-indeling.
-				{% if not slug %}Een nieuw werk komt achteraan in de eerste sectie met werken.{% endif %}</p>
+				{% if not slug %}Een nieuw onderwerp komt achteraan in {{ "de gekozen sectie" if section else "de eerste sectie met onderwerpen" }}.{% endif %}</p>
 		</div>
 	</section>
 

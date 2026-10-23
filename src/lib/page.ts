@@ -131,6 +131,9 @@ export async function loadPage(lang: Lang): Promise<ResolvedPage> {
 			topics,
 		});
 	}
+	const anchors = sections.filter((s) => s.ref.type !== 'hero').map((s) => s.anchor);
+	for (const dup of new Set(anchors.filter((a, i) => anchors.indexOf(a) !== i)))
+		throw new Error(`Two sections share the anchor "${dup}" on the ${lang} page.`);
 	const menu = sections
 		.filter((s) => s.ref.menu)
 		.map((s) => ({ label: s.entry.data.menuLabel ?? s.entry.data.title, anchor: s.anchor }));

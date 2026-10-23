@@ -33,7 +33,7 @@
 		<li>
 			<span><code>{{ change.status }}</code> {{ change.path }}</span>
 			<form method="post" action="/publiceren/terugdraaien"
-				onsubmit="return confirm('De wijziging in {{ change.path }} ongedaan maken? Dit kan niet worden hersteld.')">
+				data-confirm="De wijziging in {{ change.path }} ongedaan maken? Dit kan niet worden hersteld.">
 				<input type="hidden" name="path" value="{{ change.path }}">
 				<button class="link">Ongedaan maken</button>
 			</form>

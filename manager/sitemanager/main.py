@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from ruamel.yaml.comments import CommentedMap
 from starlette.datastructures import FormData, UploadFile
 
-from . import style, validation
+from . import layout, style, validation
 from .content import LANGS, PAGE_NAMES, Entry, SiteContent
 from .images import safe_stem, save_upload
 from .publish import Publisher, default_message, latest_deploy, pages_url
@@ -198,13 +198,19 @@ def work_view(nl: Entry | None, en: Entry | None) -> dict:
 
 
 def render_work(
-    request: Request, slug: str | None, view: dict, errors: list[str], message: str = ""
+    request: Request,
+    slug: str | None,
+    view: dict,
+    errors: list[str],
+    message: str = "",
+    section: str = "",
 ):
     return templates.TemplateResponse(
         request,
         "work.html",
         {
             "slug": slug,
+            "section": section,
             "work": view,
             "errors": errors,
             "message": message,
@@ -216,8 +222,8 @@ def render_work(
 
 
 @app.get("/werken/nieuw", response_class=HTMLResponse)
-def new_work(request: Request):
-    return render_work(request, None, work_view(None, None), [])
+def new_work(request: Request, sectie: str = ""):
+    return render_work(request, None, work_view(None, None), [], section=sectie)
 
 
 @app.get("/werken/{slug}", response_class=HTMLResponse)
@@ -338,12 +344,17 @@ async def save_work(request: Request, slug: str | None):
             }
             for image in images
         ]
-        return render_work(request, None if creating else slug, view, errors)
+        return render_work(
+            request, None if creating else slug, view, errors, section=str(form.get("section", ""))
+        )
 
     for entry in to_save:
         content.save(entry)
     if creating:
-        content.place_topic(slug)
+        try:
+            content.place_topic(slug, str(form.get("section", "")) or None)
+        except layout.LayoutError as error:
+            return redirect(f"/werken/{slug}", f"Opgeslagen, maar niet op de pagina gezet: {error}")
     return redirect(f"/werken/{slug}", "Opgeslagen.")
 
 
@@ -414,6 +425,168 @@ async def save_page(request: Request, name: str):
     for entry in entries:
         content.save(entry)
     return redirect(f"/paginas/{name}", "Opgeslagen.")
+
+
+# Page layout ---------------------------------------------------------------
+
+
+def layout_view() -> dict:
+    """Sections with their topics, labels and band colours, for the layout screen."""
+    data = content.read_structure()
+    bands = content.bands()
+
+    def label(collection: str, entry_id: str) -> dict:
+        nl, en = content.get(collection, "nl", entry_id), content.get(collection, "en", entry_id)
+        return {
+            "title": str((nl or en).data.get("title", entry_id)) if (nl or en) else entry_id,
+            "missing_en": en is None,
+        }
+
+    rows = []
+    for index, section in enumerate(layout.sections(data)):
+        rows.append(
+            {
+                **section,
+                **label("sections", section["id"]),
+                "band": bands.get(f"section:{section['id']}"),
+                "first": index == 1,
+                "last": index == len(layout.sections(data)) - 2,
+                "topics": [
+                    {"id": t, **label("topics", t), "band": bands.get(f"topic:{t}")}
+                    for t in section.get("topics", [])
+                ],
+            }
+        )
+    placed = set(layout.placed_topics(data))
+    unplaced = [{"id": t, **label("topics", t)} for t in content.slugs("topics") if t not in placed]
+    return {"sections": rows, "unplaced": unplaced, "link": data["sections"][0].get("link", "")}
+
+
+@app.get("/indeling", response_class=HTMLResponse)
+def page_layout(request: Request, bericht: str = "", fout: str = ""):
+    view = layout_view()
+    return templates.TemplateResponse(
+        request,
+        "layout.html",
+        {
+            **view,
+            "targets": [s for s in view["sections"] if s["type"] == "section"],
+            "message": bericht,
+            "errors": [fout] if fout else [],
+            "preview_url": preview_url(request),
+        },
+    )
+
+
+def change_layout(change, message: str) -> RedirectResponse:
+    """Apply a change to page.json if the result still follows the rules."""
+    data = content.read_structure()
+    try:
+        result = change(data)
+    except layout.LayoutError as error:
+        return RedirectResponse(f"/indeling?fout={quote(str(error))}", status_code=303)
+    problems = layout.check(data)
+    if problems:
+        return RedirectResponse(f"/indeling?fout={quote(problems[0])}", status_code=303)
+    content.write_structure(data)
+    return redirect("/indeling", message(result) if callable(message) else message)
+
+
+@app.post("/indeling/sectie/{section_id}/{action}")
+async def section_action(request: Request, section_id: str, action: str):
+    form = await request.form()
+    if action == "omhoog":
+        return change_layout(lambda d: layout.move_section(d, section_id, -1), "Sectie verplaatst.")
+    if action == "omlaag":
+        return change_layout(lambda d: layout.move_section(d, section_id, +1), "Sectie verplaatst.")
+    if action == "menu":
+        return change_layout(
+            lambda d: layout.toggle_menu(d, section_id),
+            lambda on: "In het menu gezet." if on else "Uit het menu gehaald.",
+        )
+    if action == "verwijderen":
+        target = str(form.get("topics_to", "")) or None
+
+        def remove(data):
+            return layout.remove_section(data, section_id, target)
+
+        response = change_layout(remove, "Sectie verwijderd.")
+        if "fout=" not in response.headers["location"]:
+            content.delete("sections", section_id)
+        return response
+    raise HTTPException(404)
+
+
+def unique_anchor(base: str) -> str:
+    taken = set()
+    for section in content.sections():
+        for lang in LANGS:
+            entry = content.get("sections", lang, section["id"])
+            if entry and entry.data.get("anchor"):
+                taken.add(str(entry.data["anchor"]))
+    anchor, number = base, 2
+    while anchor in taken:
+        anchor, number = f"{base}-{number}", number + 1
+    return anchor
+
+
+@app.post("/indeling/sectie")
+async def add_section(request: Request):
+    form = await request.form()
+    titles = {lang: str(form.get(f"{lang}_title", "")).strip() for lang in LANGS}
+    if not titles["nl"]:
+        return RedirectResponse(
+            f"/indeling?fout={quote('Geef de nieuwe sectie een Nederlandse kop.')}", status_code=303
+        )
+    section_id, number = safe_stem(titles["nl"]), 2
+    existing = {s["id"] for s in content.sections()} | set(content.slugs("sections"))
+    while section_id in existing:
+        section_id, number = f"{safe_stem(titles['nl'])}-{number}", number + 1
+    response = change_layout(lambda d: layout.add_section(d, section_id), "Sectie toegevoegd.")
+    if "fout=" in response.headers["location"]:
+        return response
+    for lang, title in titles.items():
+        if title:
+            entry = new_entry("sections", lang, section_id)
+            entry.data["title"] = title
+            entry.data["anchor"] = unique_anchor(safe_stem(title))
+            content.save(entry)
+    return redirect(f"/paginas/{section_id}", "Sectie toegevoegd. Vul hier de tekst in.")
+
+
+@app.post("/indeling/openingsbeeld/link")
+async def hero_link(request: Request):
+    form = await request.form()
+    target = str(form.get("target", ""))
+    return change_layout(lambda d: layout.set_hero_link(d, target), "Link aangepast.")
+
+
+@app.post("/indeling/onderwerp/{topic_id}/{action}")
+async def topic_action(request: Request, topic_id: str, action: str):
+    form = await request.form()
+    if action == "omhoog":
+        return change_layout(lambda d: layout.move_topic(d, topic_id, -1), "Onderwerp verplaatst.")
+    if action == "omlaag":
+        return change_layout(lambda d: layout.move_topic(d, topic_id, +1), "Onderwerp verplaatst.")
+    if action == "naar":
+        target = str(form.get("section", ""))
+        return change_layout(
+            lambda d: layout.place_topic(d, topic_id, target), "Onderwerp verplaatst."
+        )
+    if action == "van-pagina":
+        return change_layout(
+            lambda d: layout.unplace_topic(d, topic_id),
+            "Onderwerp van de pagina gehaald. De teksten blijven bewaard.",
+        )
+    if action == "verwijderen":
+        if topic_id in layout.placed_topics(content.read_structure()):
+            return RedirectResponse(
+                f"/indeling?fout={quote('Haal het onderwerp eerst van de pagina.')}",
+                status_code=303,
+            )
+        content.delete("topics", topic_id)
+        return redirect("/indeling", "Onderwerp verwijderd.")
+    raise HTTPException(404)
 
 
 # Contact data --------------------------------------------------------------

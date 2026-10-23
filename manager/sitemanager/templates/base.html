@@ -11,6 +11,7 @@
 		<a class="brand" href="/">Sitebeheer <span>Daan Cornelisse</span></a>
 		<nav>
 			<a href="/">Overzicht</a>
+			<a href="/indeling">Pagina-indeling</a>
 			<a href="/contact">Contact &amp; links</a>
 			<a href="/stijl">Stijl</a>
 			<a href="/publiceren">Publiceren</a>
@@ -26,5 +27,12 @@
 		{% endif %}
 		{% block content %}{% endblock %}
 	</main>
+	<script>
+		// Forms with data-confirm ask before they are sent.
+		document.addEventListener('submit', (event) => {
+			const question = event.target.dataset?.confirm;
+			if (question && !confirm(question)) event.preventDefault();
+		});
+	</script>
 </body>
 </html>

@@ -466,3 +466,126 @@ button:disabled {
 .reset-form {
 	margin-top: 1rem;
 }
+
+.layout,
+.layout-topics {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.layout {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.layout-section,
+.layout-add {
+	padding: 1rem 1.25rem;
+	border-radius: var(--radius);
+	background: #fff;
+	box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+
+.layout-section--fixed {
+	background: #f6f1e6;
+}
+
+.layout-add {
+	border: 2px dashed #d8c9aa;
+	box-shadow: none;
+	background: transparent;
+}
+
+.layout-section__head,
+.layout-topics li,
+.layout-section__foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem 1rem;
+}
+
+.layout-topics {
+	margin-top: 0.75rem;
+	border-top: 1px solid #eee3cf;
+}
+
+.layout-topics li {
+	padding: 0.5rem 0 0.5rem 1.25rem;
+	border-bottom: 1px solid #eee3cf;
+}
+
+.layout-section__foot {
+	margin-top: 0.75rem;
+}
+
+.layout-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+form.inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+form.inline select,
+.inline-form select {
+	width: auto;
+	min-height: 2.25rem;
+	padding: 0.25rem 0.5rem;
+}
+
+.inline-form {
+	display: grid;
+	gap: 0.6rem;
+	margin-top: 0.75rem;
+}
+
+.inline-form label {
+	font-weight: 400;
+}
+
+.inline-form button {
+	justify-self: start;
+}
+
+button.small,
+.button.small {
+	min-height: 2.25rem;
+	padding: 0 0.8rem;
+	font-size: 0.9rem;
+}
+
+.button.secondary {
+	background: var(--paper);
+	color: var(--ink);
+}
+
+button.danger {
+	background: var(--error);
+	color: #fff;
+}
+
+.band-dot {
+	display: inline-block;
+	width: 0.9rem;
+	height: 0.9rem;
+	margin-right: 0.35rem;
+	border: 1px solid rgb(0 0 0 / 0.25);
+	border-radius: 50%;
+	vertical-align: -0.1rem;
+}
+
+.band-dot--cream {
+	background: var(--cream);
+}
+
+.band-dot--paper {
+	background: var(--paper);
+}

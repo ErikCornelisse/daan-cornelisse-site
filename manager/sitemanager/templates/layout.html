@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Pagina-indeling{% endblock %}
+
+{% macro band_dot(band) -%}
+{% if band %}<span class="band-dot band-dot--{{ band }}" title="Achtergrond: {{ 'crème' if band == 'cream' else 'papier' }}"></span>{% endif %}
+{%- endmacro %}
+
+{% macro button(url, label, extra='', confirm='') -%}
+<form method="post" action="{{ url }}" class="inline"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>
+	{{ extra|safe }}<button class="small">{{ label }}</button>
+</form>
+{%- endmacro %}
+
+{% block content %}
+<p class="crumbs"><a href="/">Overzicht</a> › Pagina-indeling</p>
+<div class="page-head">
+	<h1>Pagina-indeling</h1>
+	<a href="{{ preview_url }}" target="_blank" rel="noopener">Bekijk in voorbeeld</a>
+</div>
+<p class="hint">De volgorde van boven naar beneden is de volgorde op de site. Het openingsbeeld staat altijd bovenaan
+	en de contactsectie altijd onderaan. De bolletjes tonen de achtergrondkleur die elk deel krijgt.
+	Wijzigingen gaan pas online bij <a href="/publiceren">Publiceren</a>.</p>
+
+<ol class="layout">
+	{% for section in sections %}
+	<li class="layout-section{% if section.type in ('hero', 'contact') %} layout-section--fixed{% endif %}">
+		<div class="layout-section__head">
+			<div>
+				{{ band_dot(section.band) }}
+				<strong>{{ section.title }}</strong>
+				<span class="hint">
+					{% if section.type == 'hero' %}openingsbeeld · staat vast
+					{% elif section.type == 'contact' %}contact · staat vast
+					{% else %}sectie{% endif %}
+					{% if section.menu %} · in het menu{% endif %}
+				</span>
+				{% if section.missing_en %}<span class="badge">Engels ontbreekt</span>{% endif %}
+			</div>
+			<div class="layout-actions">
+				<a class="button small" href="/paginas/{{ section.id }}">Bewerken</a>
+				{% if section.type == 'section' %}
+				{% if not section.first %}{{ button('/indeling/sectie/' ~ section.id ~ '/omhoog', '↑ Omhoog') }}{% endif %}
+				{% if not section.last %}{{ button('/indeling/sectie/' ~ section.id ~ '/omlaag', '↓ Omlaag') }}{% endif %}
+				{% endif %}
+				{% if section.type != 'hero' %}
+				{{ button('/indeling/sectie/' ~ section.id ~ '/menu', 'Uit menu' if section.menu else 'In menu') }}
+				{% endif %}
+			</div>
+		</div>
+
+		{% if section.type == 'hero' %}
+		<form method="post" action="/indeling/openingsbeeld/link" class="inline-form">
+			<label>De link in het openingsbeeld gaat naar
+				<select name="target">
+					<option value="">geen link</option>
+					{% for target in sections if target.type != 'hero' %}
+					<option value="{{ target.id }}" {% if target.id == link %}selected{% endif %}>{{ target.title }}</option>
+					{% endfor %}
+				</select>
+			</label>
+			<button class="small">Opslaan</button>
+		</form>
+		{% endif %}
+
+		{% if section.type == 'section' %}
+		<ol class="layout-topics">
+			{% for topic in section.topics %}
+			<li>
+				<div>{{ band_dot(topic.band) }} {{ topic.title }}
+					{% if topic.missing_en %}<span class="badge">Engels ontbreekt</span>{% endif %}</div>
+				<div class="layout-actions">
+					<a class="button small secondary" href="/werken/{{ topic.id }}">Bewerken</a>
+					{% if not loop.first %}{{ button('/indeling/onderwerp/' ~ topic.id ~ '/omhoog', '↑') }}{% endif %}
+					{% if not loop.last %}{{ button('/indeling/onderwerp/' ~ topic.id ~ '/omlaag', '↓') }}{% endif %}
+					{% if targets|length > 1 %}
+					<form method="post" action="/indeling/onderwerp/{{ topic.id }}/naar" class="inline">
+						<select name="section" aria-label="Verplaatsen naar sectie">
+							{% for target in targets if target.id != section.id %}
+							<option value="{{ target.id }}">naar {{ target.title }}</option>
+							{% endfor %}
+						</select>
+						<button class="small">Verplaatsen</button>
+					</form>
+					{% endif %}
+					{{ button('/indeling/onderwerp/' ~ topic.id ~ '/van-pagina', 'Van de pagina') }}
+				</div>
+			</li>
+			{% endfor %}
+		</ol>
+		<div class="layout-section__foot">
+			<a href="/werken/nieuw?sectie={{ section.id }}">+ Onderwerp toevoegen</a>
+			<form method="post" action="/indeling/sectie/{{ section.id }}/verwijderen" class="inline"
+				data-confirm="De sectie “{{ section.title }}” verwijderen?">
+				{% if section.topics %}
+				<select name="topics_to" aria-label="Wat gebeurt er met de onderwerpen">
+					<option value="">onderwerpen van de pagina halen (teksten blijven bewaard)</option>
+					{% for target in targets if target.id != section.id %}
+					<option value="{{ target.id }}">onderwerpen naar {{ target.title }}</option>
+					{% endfor %}
+				</select>
+				{% endif %}
+				<button class="small danger">Sectie verwijderen</button>
+			</form>
+		</div>
+		{% endif %}
+	</li>
+
+	{% if loop.revindex == 2 %}
+	<li class="layout-add">
+		<form method="post" action="/indeling/sectie" class="inline-form">
+			<strong>Nieuwe sectie</strong> <span class="hint">(komt hier, vóór de contactsectie)</span>
+			<div class="row">
+				<label>Kop (Nederlands)<input name="nl_title" required></label>
+				<label>Kop (English) <span class="hint">optioneel</span><input name="en_title"></label>
+			</div>
+			<button class="small">Sectie toevoegen</button>
+		</form>
+	</li>
+	{% endif %}
+	{% endfor %}
+</ol>
+
+{% if unplaced %}
+<section class="card">
+	<h2>Niet op de pagina</h2>
+	<p class="hint">Deze onderwerpen staan niet op de site. Je kunt ze weer in een sectie zetten of definitief verwijderen.</p>
+	<ul class="layout-topics">
+		{% for topic in unplaced %}
+		<li>
+			<div>{{ topic.title }}</div>
+			<div class="layout-actions">
+				<a class="button small secondary" href="/werken/{{ topic.id }}">Bewerken</a>
+				{% if targets %}
+				<form method="post" action="/indeling/onderwerp/{{ topic.id }}/naar" class="inline">
+					<select name="section" aria-label="In sectie zetten">
+						{% for target in targets %}<option value="{{ target.id }}">in {{ target.title }}</option>{% endfor %}
+					</select>
+					<button class="small">Op de pagina zetten</button>
+				</form>
+				{% endif %}
+				{{ button('/indeling/onderwerp/' ~ topic.id ~ '/verwijderen', 'Verwijderen', confirm='Dit onderwerp definitief verwijderen? Tot het publiceren kan het nog ongedaan worden gemaakt.') }}
+			</div>
+		</li>
+		{% endfor %}
+	</ul>
+</section>
+{% endif %}
+{% endblock %}

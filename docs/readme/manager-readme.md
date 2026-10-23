@@ -24,6 +24,7 @@ dependencies installed (`npm install` in the repository root) for the preview.
 | Screen | Edits |
 |---|---|
 | Overzicht | Lists works and pages per language, starts/stops the preview, shows unpublished changes |
+| Pagina-indeling | The structure of the landing page (`page.json`): sections up/down, add, remove, in/out of the menu, the hero's link target; topics up/down, to another section, off the page and back, delete; band colour per part. Hero and contact are locked. Changes that break the rules of `src/lib/page.ts` are refused |
 | Werken | Topics (today the works): accent colour, 1–2 images (upload, replace, remove, alt text per language), and title, discipline, quote and text in Dutch and English side by side; "Nieuw werk" adds one at the end of the first section with works |
 | Pagina's | Texts of every section in `page.json` (hero, sections, contact) and of the privacy page, in both languages |
 | Contact & links | E-mail address, Instagram, Spotify and LinkedIn links, Web3Forms key |
@@ -86,6 +87,7 @@ plan.
 | `sitemanager/validation.py` | Checks mirroring `src/content.config.ts`; keep the two in step |
 | `sitemanager/images.py` | Image uploads: format check, orientation, scaled to max 2400 px |
 | `sitemanager/site_tools.py` | Git status and the Astro preview |
+| `sitemanager/layout.py` | Structure operations on `page.json` and the same rules as `src/lib/page.ts` |
 | `sitemanager/style.py` | Style tokens, font list, contrast rules, defaults |
 | `sitemanager/publish.py` | Check, commit, pull, push, undo, and the GitHub deploy status |
 | `sitemanager/main.py` | FastAPI routes; templates in `templates/`, CSS in `static/` |

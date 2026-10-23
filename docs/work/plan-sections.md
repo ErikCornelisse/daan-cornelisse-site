@@ -31,7 +31,7 @@ text falls back to the Dutch one.
 | # | Phase | Delivers | Depends on | Status |
 |---|-------|----------|------------|--------|
 | 1 | Content-driven page | `page.json`, `sections` and `topics` collections, rules checked at build time, page/menu/bands rendered from them; manager reads the new layout | — | done |
-| 2 | Page layout in the manager | Pagina-indeling: reorder, add, remove sections, menu toggle; reorder and move topics | 1 | todo |
+| 2 | Page layout in the manager | Pagina-indeling: reorder, add, remove sections, menu toggle; reorder and move topics | 1 | done |
 | 3 | Section editors | Editors for section (own text, image, subheadings), hero (photo upload, focal point, link target) and contact | 2 | todo |
 | 4 | Bands from the structure | Stijl contrast check reads bands from `page.json`; optional band override per section | 2 | todo |
 
@@ -60,7 +60,20 @@ be exactly one hero, and it must be the first section." Manager: 51 tests
 pass. Topic order now lives only in `page.json` (the `order` field is gone);
 the manager adds a new work at the end of the first section with works.
 
-## Phases 2–4
+## Phase 2 — Page layout in the manager
+
+- [x] Structure operations with the same rules as `src/lib/page.ts` (`manager/sitemanager/layout.py`); a change that breaks a rule is refused and `page.json` stays as it was
+- [x] Pagina-indeling screen: hero and contact locked; sections up/down, in/out of the menu, add (before contact, with a Dutch and optional English heading and anchor), remove (topics move to another section or off the page)
+- [x] Hero link target chosen on the same screen; the section it points to cannot be removed
+- [x] Topics up/down, to another section, off the page ("Niet op de pagina", texts kept) and, once off the page, deleted; *Onderwerp toevoegen* per section
+- [x] Band colour shown per section and topic
+- [x] Site build also refuses two sections with the same anchor in one language
+
+**Result (2026-10-23):** 65 manager tests pass. In the browser, adding a
+section and moving *Over mij* up showed directly in the preview with the
+bands still alternating; both changes were undone from the screen.
+
+## Phases 3–4
 Detailed when the previous phase is done.
 
 ## Open questions
