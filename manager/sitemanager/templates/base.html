@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="nl">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}Sitebeheer{% endblock %} · Daan Cornelisse</title>
+	<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+	<header class="topbar">
+		<a class="brand" href="/">Sitebeheer <span>Daan Cornelisse</span></a>
+		<nav>
+			<a href="/">Overzicht</a>
+			<a href="/contact">Contact &amp; links</a>
+		</nav>
+	</header>
+	<main class="page">
+		{% if message %}<p class="notice" role="status">{{ message }}</p>{% endif %}
+		{% if errors %}
+		<div class="errors" role="alert">
+			<p>Nog niet opgeslagen. Pas dit aan:</p>
+			<ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+		</div>
+		{% endif %}
+		{% block content %}{% endblock %}
+	</main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Contact &amp; links{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">Overzicht</a> › Contact &amp; links</p>
+<h1>Contact &amp; links</h1>
+
+<form method="post" class="stack">
+	<section class="card">
+		<label>E-mailadres
+			<input name="email" type="email" value="{{ data.email }}" required>
+		</label>
+		{% for key, label in social_labels.items() %}
+		<label>{{ label }}
+			<input name="social_{{ key }}" type="url" value="{{ data.social[key] if data.social and key in data.social else '' }}" placeholder="https://">
+		</label>
+		{% endfor %}
+	</section>
+	<section class="card">
+		<h2>Contactformulier</h2>
+		<label>Web3Forms-toegangssleutel
+			<input name="access_key" value="{{ data.contactForm.accessKey if data.contactForm else '' }}">
+		</label>
+		<p class="hint">Zolang dit leeg is, laat het formulier op de site zien dat het nog niet gekoppeld is.</p>
+	</section>
+	<div class="actions">
+		<button>Opslaan</button>
+		<a href="/">Annuleren</a>
+	</div>
+</form>
+{% endblock %}

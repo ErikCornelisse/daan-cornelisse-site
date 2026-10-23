@@ -10,3 +10,11 @@ node_modules/
 dist/
 .astro/
 npm-debug.log*
+
+# Python (manager/)
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/

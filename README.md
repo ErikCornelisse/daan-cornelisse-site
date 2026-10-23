@@ -17,6 +17,11 @@ Requires Node 22.23 or newer.
 | `npm run build` | Static build into `dist/` |
 | `npm run preview` | Serve the build locally |
 
+## Site manager
+
+Content can be edited in a local web app in `manager/`; see
+[docs/readme/manager-readme.md](docs/readme/manager-readme.md).
+
 ## Deployment
 
 - **Prototype:** every push to `main` builds and deploys to GitHub Pages

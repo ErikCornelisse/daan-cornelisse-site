@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Overzicht{% endblock %}
+{% block content %}
+<section class="card">
+	<div class="card__head">
+		<h1>Voorbeeld van de site</h1>
+		{% if preview_running %}
+		<form method="post" action="/voorbeeld/stop"><button class="secondary">Voorbeeld stoppen</button></form>
+		{% else %}
+		<form method="post" action="/voorbeeld/start"><button>Voorbeeld starten</button></form>
+		{% endif %}
+	</div>
+	{% if preview_running %}
+	<p>Het voorbeeld draait en ververst vanzelf na elke wijziging:
+		<a href="{{ preview_url }}" target="_blank" rel="noopener">voorbeeld openen</a>.</p>
+	{% else %}
+	<p>Start het voorbeeld om de site met je wijzigingen te bekijken voordat ze online gaan.</p>
+	{% endif %}
+</section>
+
+<section class="card">
+	<div class="card__head">
+		<h2>Werken</h2>
+		<a class="button" href="/werken/nieuw">Nieuw werk</a>
+	</div>
+	<table>
+		<thead><tr><th>#</th><th>Nederlands</th><th>English</th><th></th></tr></thead>
+		<tbody>
+		{% for work in works %}
+			{% set base = work.nl or work.en %}
+			<tr>
+				<td>{{ base.data.order }}</td>
+				<td>{{ work.nl.data.title if work.nl else "—" }}</td>
+				<td>{% if work.en %}{{ work.en.data.title }}{% else %}<span class="badge">ontbreekt</span>{% endif %}</td>
+				<td><a href="/werken/{{ base.slug }}">Bewerken</a></td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</section>
+
+<section class="card">
+	<h2>Pagina's</h2>
+	<table>
+		<thead><tr><th>Onderdeel</th><th>Nederlands</th><th>English</th><th></th></tr></thead>
+		<tbody>
+		{% for name, label, entries in pages %}
+			<tr>
+				<td>{{ label }}</td>
+				<td>{{ entries.nl.data.title if entries.nl else "—" }}</td>
+				<td>{% if entries.en %}{{ entries.en.data.title }}{% else %}<span class="badge">ontbreekt</span>{% endif %}</td>
+				<td><a href="/paginas/{{ name }}">Bewerken</a></td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</section>
+
+<section class="card">
+	<h2>Nog niet gepubliceerd</h2>
+	{% if changes %}
+	<p>Deze bestanden zijn gewijzigd sinds de laatste publicatie:</p>
+	<ul class="changes">{% for change in changes %}<li><code>{{ change.status }}</code> {{ change.path }}</li>{% endfor %}</ul>
+	<p class="hint">Publiceren vanuit het beheer komt in de volgende stap.</p>
+	{% else %}
+	<p>Alles is gepubliceerd.</p>
+	{% endif %}
+	<p class="hint">Laatste publicatie: {{ last_commit }}</p>
+</section>
+{% endblock %}

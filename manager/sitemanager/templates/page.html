@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ label }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">Overzicht</a> › Pagina's</p>
+<div class="page-head">
+	<h1>{{ label }}</h1>
+	<a href="{{ preview_url }}" target="_blank" rel="noopener">Bekijk in voorbeeld</a>
+</div>
+
+<form method="post" class="stack">
+	<div class="languages">
+		{% for lang in langs %}
+		<section class="card" lang="{{ lang }}">
+			<h2>{{ lang_names[lang] }}</h2>
+			{% for key, field_label in fields %}
+			<label>{{ field_label }}
+				<input name="{{ lang }}_{{ key }}" value="{{ values[lang][key] }}">
+			</label>
+			{% endfor %}
+			{% if has_body %}
+			<label>Tekst
+				<textarea name="{{ lang }}_body" rows="16">{{ values[lang].body }}</textarea>
+			</label>
+			<p class="hint">Een lege regel begint een nieuwe alinea. Een regel die begint met <code>###</code> wordt een tussenkop.</p>
+			{% endif %}
+		</section>
+		{% endfor %}
+	</div>
+	<div class="actions">
+		<button>Opslaan</button>
+		<a href="/">Annuleren</a>
+	</div>
+</form>
+{% endblock %}

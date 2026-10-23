@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ work.texts.nl.title or "Nieuw werk" }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">Overzicht</a> › Werken</p>
+<div class="page-head">
+	<h1>{{ work.texts.nl.title or work.texts.en.title or "Nieuw werk" }}</h1>
+	{% if slug %}<a href="{{ preview_url }}" target="_blank" rel="noopener">Bekijk in voorbeeld</a>{% endif %}
+</div>
+
+<form method="post" enctype="multipart/form-data" action="{{ '/werken/' ~ slug if slug else '/werken/nieuw' }}" class="stack">
+	<section class="card">
+		<h2>Algemeen</h2>
+		<div class="row">
+			<label>Accentkleur van de titel
+				<select name="accent">
+					{% for value, label in accents.items() %}
+					<option value="{{ value }}" {% if work.accent == value %}selected{% endif %}>{{ label }}</option>
+					{% endfor %}
+				</select>
+			</label>
+			<label>Volgorde op de pagina
+				<input name="order" type="number" min="1" value="{{ work.order }}" {% if slug %}required{% endif %}>
+			</label>
+		</div>
+	</section>
+
+	<section class="card">
+		<h2>Afbeeldingen</h2>
+		<p class="hint">Eén of twee afbeeldingen (JPG, PNG of WebP). De beschrijving wordt voorgelezen door schermlezers en is verplicht.</p>
+		<input type="hidden" name="image_count" value="{{ work.images|length }}">
+		{% for image in work.images %}
+		{% set i = loop.index0 %}
+		<fieldset class="image-row">
+			<legend>Afbeelding {{ loop.index }}</legend>
+			{% if image.url %}<img src="{{ image.url }}" alt="">{% else %}<div class="image-missing">niet gevonden</div>{% endif %}
+			<input type="hidden" name="image_{{ i }}_src" value="{{ image.src }}">
+			<div class="image-fields">
+				{% for lang in langs %}
+				<label>Beschrijving ({{ lang_names[lang] }})
+					<input name="image_{{ i }}_alt_{{ lang }}" value="{{ image.alt[lang] }}">
+				</label>
+				{% endfor %}
+				<label>Vervangen door
+					<input name="image_{{ i }}_file" type="file" accept="image/jpeg,image/png,image/webp">
+				</label>
+				<label class="check"><input type="checkbox" name="image_{{ i }}_remove" value="1"> Verwijderen</label>
+			</div>
+		</fieldset>
+		{% endfor %}
+		{% if work.images|length < max_images %}
+		<fieldset class="image-row">
+			<legend>Afbeelding toevoegen</legend>
+			<div class="image-missing">nieuw</div>
+			<div class="image-fields">
+				<label>Bestand
+					<input name="image_new_file" type="file" accept="image/jpeg,image/png,image/webp">
+				</label>
+				{% for lang in langs %}
+				<label>Beschrijving ({{ lang_names[lang] }})
+					<input name="image_new_alt_{{ lang }}">
+				</label>
+				{% endfor %}
+			</div>
+		</fieldset>
+		{% endif %}
+	</section>
+
+	<div class="languages">
+		{% for lang in langs %}
+		{% set text = work.texts[lang] %}
+		<section class="card" lang="{{ lang }}">
+			<h2>{{ lang_names[lang] }}</h2>
+			<label>Titel
+				<input name="{{ lang }}_title" value="{{ text.title }}">
+			</label>
+			<label>Discipline
+				<input name="{{ lang }}_discipline" value="{{ text.discipline }}">
+			</label>
+			<label>Citaat <span class="hint">(optioneel)</span>
+				<input name="{{ lang }}_quote" value="{{ text.quote }}">
+			</label>
+			<label>Tekst
+				<textarea name="{{ lang }}_body" rows="12">{{ text.body }}</textarea>
+			</label>
+			<p class="hint">Een lege regel begint een nieuwe alinea.</p>
+		</section>
+		{% endfor %}
+	</div>
+
+	<div class="actions">
+		<button>Opslaan</button>
+		<a href="/">Annuleren</a>
+	</div>
+</form>
+{% endblock %}
