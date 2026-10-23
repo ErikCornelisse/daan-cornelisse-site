@@ -92,9 +92,13 @@ const { Content } = await render(page);
 		padding-inline: 0.15em;
 	}
 
-	.brush-button:hover .brush-button__label {
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
+	/* Only on devices that really hover: on touch screens the underline
+	   would stick after a tap */
+	@media (hover: hover) {
+		.brush-button:hover .brush-button__label {
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+		}
 	}
 
 	.brush-button:focus-visible {

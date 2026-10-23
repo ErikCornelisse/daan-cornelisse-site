@@ -43,7 +43,7 @@ Background, decisions and options: [phase 1 proposal](../analysis/phase1-static-
 | 4 | [Hero and header](phase-04-hero.md) | Art-directed hero, header nav, *Mijn verhaal* scroll link | 3 | done |
 | 5 | [Work blocks](phase-05-works.md) | `works` collection and `WorkBlock` for the three works in both languages | 4 | done |
 | 6 | [About and contact](phase-06-contact.md) | *Over mij*, e-mail, social links, contact form, brush button | 5 | in-progress (form awaits access key) |
-| 7 | [Quality pass](phase-07-quality.md) | Accessibility, performance, privacy note, meta / Open Graph | 6 | todo |
+| 7 | [Quality pass](phase-07-quality.md) | Accessibility, performance, privacy note, meta / Open Graph | 6 | done (macOS Safari / Android still to check) |
 | 8 | [Production hand-over](phase-08-handover.md) | Root-path build and upload instructions for mijndomein | 7 | todo |
 
 Status: `todo` → `in-progress` → `done`. This table is the source of truth
