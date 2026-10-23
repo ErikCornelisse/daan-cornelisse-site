@@ -16,6 +16,7 @@ export const langStorageKey = 'dc-lang';
 const nl = {
 	'site.title': 'Daan Cornelisse',
 	'site.description': 'Daan Cornelisse maakt illustraties, muziek en digitale kunst over wat je van buiten niet ziet.',
+	'nav.label': 'Hoofdmenu',
 	'nav.about': 'Over mij',
 	'nav.contact': 'Contact',
 	'section.works': 'Mediums en Disciplines',
@@ -29,6 +30,7 @@ const nl = {
 const en: Record<keyof typeof nl, string> = {
 	'site.title': 'Daan Cornelisse',
 	'site.description': 'Daan Cornelisse makes illustrations, music and digital art about what you cannot see from the outside.',
+	'nav.label': 'Main menu',
 	'nav.about': 'About me',
 	'nav.contact': 'Contact',
 	'section.works': 'Media and Disciplines',

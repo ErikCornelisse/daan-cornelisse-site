@@ -1,9 +1,11 @@
 ---
-// Style preview of the section bands in both languages. The bands get their
-// real content in steps 4–6 of phase 1.
+// Landing page in both languages. Hero and header are final; the bands below
+// get their real content in steps 5 and 6 of phase 1.
+import { getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
-import LanguageSwitch from '../../components/LanguageSwitch.astro';
+import Header from '../../components/Header.astro';
+import Hero from '../../components/Hero.astro';
 import { languages, type Lang } from '../../i18n/ui';
 import { useTranslations } from '../../i18n/utils';
 
@@ -13,6 +15,8 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
+const home = await getEntry('pages', `${lang}/home`);
+if (!home) throw new Error(`Missing src/content/pages/${lang}/home.md`);
 
 // Temporary placeholder text until the content collections arrive (step 5).
 const placeholder = {
@@ -26,10 +30,16 @@ const quote = {
 ---
 
 <BaseLayout title={t('site.title')} lang={lang} description={t('site.description')} path="">
-	<header class="container topbar">
-		<LanguageSwitch lang={lang} />
-	</header>
+	<Header lang={lang} overlay />
 	<main>
+		<Hero
+			title={home.data.title}
+			subtitle={home.data.subtitle}
+			cta={home.data.cta}
+			ctaHref={`#${t('id.about')}`}
+			imageAlt={home.data.imageAlt ?? ''}
+		/>
+
 		<Section>
 			<div class="flow">
 				<h2 class="centred">{t('section.works')}</h2>
@@ -81,12 +91,6 @@ const quote = {
 </BaseLayout>
 
 <style>
-	.topbar {
-		display: flex;
-		justify-content: flex-end;
-		padding-block: var(--space-xs);
-	}
-
 	.centred {
 		text-align: center;
 	}

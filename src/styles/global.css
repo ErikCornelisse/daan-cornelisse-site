@@ -22,6 +22,11 @@ html {
 	}
 }
 
+/* Anchor targets land with a little air above the heading */
+[id] {
+	scroll-margin-top: var(--space-s);
+}
+
 body {
 	min-height: 100vh;
 	background: var(--color-cream);

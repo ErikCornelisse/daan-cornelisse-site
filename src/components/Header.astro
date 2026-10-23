@@ -1,0 +1,112 @@
+---
+// Site header: name, section links and the language switch. With `overlay`
+// it sits on top of the hero photo in light text, as in the mockup.
+import LanguageSwitch from './LanguageSwitch.astro';
+import type { Lang } from '../i18n/ui';
+import { localeUrl, useTranslations } from '../i18n/utils';
+
+interface Props {
+	lang: Lang;
+	overlay?: boolean;
+}
+
+const { lang, overlay = false } = Astro.props;
+const t = useTranslations(lang);
+const home = localeUrl(lang);
+---
+
+<header class:list={['site-header', { 'site-header--overlay': overlay }]}>
+	<div class="container site-header__inner">
+		<a class="site-header__name" href={home}>{t('site.title')}</a>
+		<nav aria-label={t('nav.label')}>
+			<ul role="list">
+				<li><a href={`${home}#${t('id.about')}`}>{t('nav.about')}</a></li>
+				<li><a href={`${home}#${t('id.contact')}`}>{t('nav.contact')}</a></li>
+				<li class="site-header__lang"><LanguageSwitch lang={lang} /></li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+<style>
+	.site-header {
+		font-family: var(--font-heading);
+		font-size: var(--step--1);
+		letter-spacing: 0.03em;
+	}
+
+	.site-header--overlay {
+		position: absolute;
+		inset-inline: 0;
+		top: 0;
+		z-index: 2;
+		color: var(--color-on-photo);
+	}
+
+	.site-header--overlay :focus-visible {
+		outline-color: var(--color-on-photo);
+	}
+
+	.site-header__inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-s);
+	}
+
+	a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target);
+		text-decoration: none;
+	}
+
+	nav a:hover,
+	.site-header__name:hover {
+		text-decoration: underline;
+	}
+
+	ul {
+		display: flex;
+		align-items: center;
+		gap: var(--space-s);
+		padding: 0;
+		list-style: none;
+	}
+
+	.site-header__lang {
+		padding-inline-start: var(--space-s);
+		border-inline-start: 1px solid currentColor;
+	}
+
+	/* The switch brings its own padding; drop it inside the header */
+	.site-header__lang :global(.lang-switch) {
+		padding-inline: 0;
+		font-size: inherit;
+	}
+
+	/* Very narrow phones: the name gives way to the links */
+	@media (max-width: 22rem) {
+		.site-header__name {
+			display: none;
+		}
+
+		.site-header__inner {
+			justify-content: flex-end;
+		}
+	}
+
+	@media (min-width: 48rem) {
+		.site-header {
+			font-size: var(--step-0);
+		}
+
+		ul {
+			gap: var(--space-m);
+		}
+
+		.site-header__lang {
+			padding-inline-start: var(--space-m);
+		}
+	}
+</style>
