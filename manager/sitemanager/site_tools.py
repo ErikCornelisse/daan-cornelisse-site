@@ -42,8 +42,15 @@ class Preview:
     def _astro(self, *args: str, timeout: int = 60) -> subprocess.CompletedProcess:
         return _run(["npx", "astro", "dev", *args], self.site_root, timeout)
 
+    @property
+    def host(self) -> str:
+        """Address the preview listens on. Explicit, because Astro's default ("localhost")
+        may bind to IPv6 only, and then a link to 127.0.0.1 cannot connect."""
+        return "0.0.0.0" if self.expose else "127.0.0.1"
+
     def status(self) -> bool:
-        """True when something answers on the preview port (much faster than `astro dev status`)."""
+        """True when the preview answers on the address its links use (much faster than
+        `astro dev status`)."""
         try:
             with socket.create_connection(("127.0.0.1", self.port), timeout=0.3):
                 return True
@@ -51,9 +58,9 @@ class Preview:
             return False
 
     def start(self) -> str:
-        args = ["--background", "--port", str(self.port)]
-        if self.expose:
-            args.append("--host")
+        # Stop a preview that may have been started otherwise (for example on another address).
+        self._astro("stop")
+        args = ["--background", "--port", str(self.port), "--host", self.host]
         result = self._astro(*args, timeout=120)
         return _message(result) or "Voorbeeld gestart."
 

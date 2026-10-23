@@ -146,3 +146,18 @@ def test_saving_the_unchanged_privacy_page_keeps_the_files_identical(app):
 def test_unknown_page_is_not_found(app):
     _, client, _ = app
     assert client.get("/paginas/bestaat-niet").status_code == 404
+
+
+def test_preview_listens_on_an_explicit_address(app, monkeypatch):
+    main, _, _ = app
+    calls = []
+    monkeypatch.setattr(main.preview, "_astro", lambda *args, **kw: calls.append(args) or _done())
+    main.preview.start()
+    assert calls[0] == ("stop",)
+    assert calls[1][-2:] == ("--host", "127.0.0.1")
+
+
+def _done():
+    import subprocess
+
+    return subprocess.CompletedProcess([], 0, "", "")

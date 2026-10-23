@@ -132,7 +132,9 @@ def test_layout_screen_shows_sections_topics_and_bands(app):
     _, client, _ = app
     page = client.get("/indeling")
     assert page.status_code == 200
-    for text in ("Mediums en Disciplines", "Tijd Voor MAX", "staat vast", "band-dot--paper"):
+    main, _, _ = app
+    heading = main.content.get("sections", "nl", "mediums").data["title"]
+    for text in (heading, "Tijd Voor MAX", "staat vast", "band-dot--paper"):
         assert text in page.text
 
 
