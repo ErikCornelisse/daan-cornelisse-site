@@ -1,0 +1,12 @@
+# Secrets & local config
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / Astro
+node_modules/
+dist/
+.astro/
+npm-debug.log*
