@@ -41,7 +41,7 @@ Background, decisions and options: [phase 1 proposal](../analysis/phase1-static-
 | 2 | [Tokens, fonts and bands](phase-02-tokens.md) | Design tokens, self-hosted fonts, cream/paper bands, mobile-first base | 1 | done |
 | 3 | [i18n skeleton](phase-03-i18n.md) | `/nl/` and `/en/`, root language chooser, switch, hreflang | 2 | done |
 | 4 | [Hero and header](phase-04-hero.md) | Art-directed hero, header nav, *Mijn verhaal* scroll link | 3 | done |
-| 5 | [Work blocks](phase-05-works.md) | `works` collection and `WorkBlock` for the three works in both languages | 4 | todo |
+| 5 | [Work blocks](phase-05-works.md) | `works` collection and `WorkBlock` for the three works in both languages | 4 | done |
 | 6 | [About and contact](phase-06-contact.md) | *Over mij*, e-mail, social links, contact form, brush button | 5 | todo |
 | 7 | [Quality pass](phase-07-quality.md) | Accessibility, performance, privacy note, meta / Open Graph | 6 | todo |
 | 8 | [Production hand-over](phase-08-handover.md) | Root-path build and upload instructions for mijndomein | 7 | todo |

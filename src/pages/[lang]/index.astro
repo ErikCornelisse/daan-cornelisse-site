@@ -1,11 +1,12 @@
 ---
-// Landing page in both languages. Hero and header are final; the bands below
-// get their real content in steps 5 and 6 of phase 1.
-import { getEntry } from 'astro:content';
+// Landing page in both languages. About and contact get their real content
+// in step 6 of phase 1.
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Header from '../../components/Header.astro';
 import Hero from '../../components/Hero.astro';
+import WorkBlock from '../../components/WorkBlock.astro';
 import { languages, type Lang } from '../../i18n/ui';
 import { useTranslations } from '../../i18n/utils';
 
@@ -18,14 +19,17 @@ const t = useTranslations(lang);
 const home = await getEntry('pages', `${lang}/home`);
 if (!home) throw new Error(`Missing src/content/pages/${lang}/home.md`);
 
-// Temporary placeholder text until the content collections arrive (step 5).
+const works = (await getCollection('works', (w) => w.id.startsWith(`${lang}/`))).sort(
+	(a, b) => a.data.order - b.data.order,
+);
+
+// Bands alternate cream and paper from the first work onwards.
+const band = (index: number) => (index % 2 ? 'paper' : 'cream');
+
+// Temporary placeholder text until step 6.
 const placeholder = {
-	nl: 'Voor een uitzending om meer bewustwording rondom epilepsie te creëren vroeg EpilepsieNL mij één van mijn pianostukken te spelen. Het stuk “Yesterday is gone” schreef ik ’s avonds nadat ik een hevige aanval had gehad en weerspiegeld de vergankelijkheid van tijd.',
+	nl: 'Voor een uitzending om meer bewustwording rondom epilepsie te creëren vroeg EpilepsieNL mij één van mijn pianostukken te spelen. Het stuk “Yesterday is gone” schreef ik ’s avonds nadat ik een hevige aanval had gehad en weerspiegelt de vergankelijkheid van tijd.',
 	en: 'For a broadcast to raise awareness of epilepsy, EpilepsieNL asked me to play one of my piano pieces. I wrote “Yesterday is gone” one evening after a severe seizure; it reflects how fleeting time is.',
-}[lang];
-const quote = {
-	nl: '“Als kind heb ik een hele slechte motoriek gehad, grappig dat je dan achter de piano belandt.”',
-	en: '“As a child my motor skills were really poor, funny that you then end up at the piano.”',
 }[lang];
 ---
 
@@ -40,40 +44,16 @@ const quote = {
 			imageAlt={home.data.imageAlt ?? ''}
 		/>
 
-		<Section>
-			<div class="flow">
-				<h2 class="centred">{t('section.works')}</h2>
-				<h3 class="accent-purple">Als het licht even uitgaat</h3>
-				<div class="text-columns flow">
-					<p>{placeholder}</p>
-					<p>{placeholder}</p>
-				</div>
-			</div>
-		</Section>
+		{
+			works.map((work, i) => (
+				<Section variant={band(i)}>
+					{i === 0 && <h2 class="centred works-heading">{t('section.works')}</h2>}
+					<WorkBlock work={work} />
+				</Section>
+			))
+		}
 
-		<Section variant="paper">
-			<div class="flow">
-				<h3 class="accent-white">Tijd Voor MAX</h3>
-				<div class="text-columns flow">
-					<p>{placeholder}</p>
-					<blockquote>
-						<p>{quote}</p>
-					</blockquote>
-				</div>
-			</div>
-		</Section>
-
-		<Section>
-			<div class="flow">
-				<h3 class="accent-orange">Voor ik sluit</h3>
-				<div class="text-columns flow">
-					<p>{placeholder}</p>
-					<p>{placeholder}</p>
-				</div>
-			</div>
-		</Section>
-
-		<Section variant="paper" id={t('id.about')}>
+		<Section variant={band(works.length)} id={t('id.about')}>
 			<div class="flow">
 				<h2 class="centred">{t('section.about')}</h2>
 				<p class="measure">{placeholder}</p>
@@ -81,7 +61,7 @@ const quote = {
 			</div>
 		</Section>
 
-		<Section id={t('id.contact')}>
+		<Section variant={band(works.length + 1)} id={t('id.contact')}>
 			<div class="flow">
 				<h2 class="centred">{t('section.contact')}</h2>
 				<p class="measure">{placeholder}</p>
@@ -95,23 +75,11 @@ const quote = {
 		text-align: center;
 	}
 
+	.works-heading {
+		margin-bottom: var(--space-l);
+	}
+
 	.measure {
 		max-width: var(--measure);
-	}
-
-	.accent-purple {
-		color: var(--color-accent-purple);
-	}
-
-	.accent-white {
-		color: var(--color-accent-white);
-	}
-
-	.accent-orange {
-		color: var(--color-accent-orange);
-	}
-
-	blockquote {
-		font-style: italic;
 	}
 </style>

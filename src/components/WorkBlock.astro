@@ -1,0 +1,123 @@
+---
+// One work: title in its accent colour, text, one or two images and an
+// optional quote. Phones stack everything. From 64rem the layout follows the
+// number of images, as in the mockup:
+//   one image  → text in two columns, image on the right;
+//   two images → text in one column, images side by side with the quote
+//                under the first.
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+
+interface Props {
+	work: CollectionEntry<'works'>;
+}
+
+const { work } = Astro.props;
+const { title, accent, images, quote } = work.data;
+const { Content } = await render(work);
+const [first, second] = images;
+const sizes = second
+	? '(min-width: 64rem) 22rem, (min-width: 48rem) 45vw, 100vw'
+	: '(min-width: 64rem) 22rem, (min-width: 48rem) 26rem, 100vw';
+---
+
+<article class:list={['work', { 'work--two': second }]} style={`--accent: var(--color-accent-${accent})`}>
+	<h3 class="work__title">{title}</h3>
+	<div class="work__text text-columns flow">
+		<Content />
+	</div>
+	<div class="work__media">
+		<div class="work__col">
+			<Image src={first.src} alt={first.alt} widths={[400, 700]} sizes={sizes} />
+			{
+				quote && (
+					<blockquote class="work__quote">
+						<p>“{quote}”</p>
+					</blockquote>
+				)
+			}
+		</div>
+		{
+			second && (
+				<div class="work__col">
+					<Image src={second.src} alt={second.alt} widths={[400, 700]} sizes={sizes} />
+				</div>
+			)
+		}
+	</div>
+</article>
+
+<style>
+	.work {
+		display: grid;
+		gap: var(--space-m);
+	}
+
+	.work__title {
+		color: var(--accent);
+		font-size: var(--step-3);
+	}
+
+	.work__media {
+		display: grid;
+		gap: var(--space-m);
+	}
+
+	.work__col {
+		display: grid;
+		gap: var(--space-m);
+		align-content: start;
+	}
+
+	.work__media img {
+		width: 100%;
+	}
+
+	.work__quote {
+		max-width: 26ch;
+		margin-inline: auto;
+		font-size: var(--step-1);
+		font-style: italic;
+		text-align: center;
+	}
+
+	@media (min-width: 48rem) {
+		.work--two .work__media {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.work:not(.work--two) .work__media {
+			max-width: 26rem;
+		}
+	}
+
+	@media (min-width: 64rem) {
+		.work {
+			grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+			/* The media column spans both rows; extra height goes below the
+			   text, not between title and text */
+			grid-template-rows: auto 1fr;
+			column-gap: var(--space-l);
+			align-items: start;
+		}
+
+		.work--two {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+		}
+
+		.work__title,
+		.work__text {
+			grid-column: 1;
+		}
+
+		.work__media {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+			align-self: center;
+		}
+
+		.work--two .work__text {
+			columns: 1;
+		}
+	}
+</style>

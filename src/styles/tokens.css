@@ -17,10 +17,14 @@
 	--color-ink: #111111;
 	--color-on-photo: #ffdda3;
 
-	/* Accent colours for work titles */
+	/* Accent colours for work titles. Titles are large text, so they need a
+	   contrast of at least 3:1 with their band (WCAG AA):
+	     purple on cream 4.4   orange on cream 3.4   brown on paper 4.6
+	   The mockup's lighter orange (#d68641, 2.2:1) and white on paper
+	   (2.4:1) fall short. */
 	--color-accent-purple: #6e5f85;
-	--color-accent-orange: #d68641;
-	--color-accent-white: #ffffff;
+	--color-accent-orange: #b56424;
+	--color-accent-brown: #5b2f1a;
 
 	/* Brush button */
 	--color-brush: #000000;
