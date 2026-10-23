@@ -1,0 +1,49 @@
+---
+// Link to the current page in the other language. Clicking it remembers the
+// choice, so the root page sends this visitor to that language next time.
+import { languages, langStorageKey, ui, type Lang } from '../i18n/ui';
+import { localeUrl, otherLang, pathWithoutLang } from '../i18n/utils';
+
+interface Props {
+	lang: Lang;
+}
+
+const target = otherLang(Astro.props.lang);
+const href = localeUrl(target, pathWithoutLang(Astro.url));
+---
+
+<a
+	class="lang-switch"
+	href={href}
+	hreflang={target}
+	lang={target}
+	aria-label={ui[target]['lang.switch']}
+	data-lang-switch={target}
+	data-storage-key={langStorageKey}
+>
+	{languages[target]}
+</a>
+
+<script>
+	for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-lang-switch]')) {
+		link.addEventListener('click', () => {
+			try {
+				localStorage.setItem(link.dataset.storageKey!, link.dataset.langSwitch!);
+			} catch {
+				// Storage blocked: the switch still works, the choice is just not remembered.
+			}
+		});
+	}
+</script>
+
+<style>
+	.lang-switch {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target);
+		padding-inline: var(--space-xs);
+		font-family: var(--font-heading);
+		font-size: var(--step--1);
+		letter-spacing: 0.04em;
+	}
+</style>

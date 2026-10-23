@@ -1,87 +1,79 @@
 ---
-// Style preview of the section bands. Replaced by the real landing page in
-// steps 3–6 of phase 1.
+// Root page: sends the visitor to /nl/ or /en/, in this order:
+//   1. a choice made earlier with the language switch;
+//   2. Dutch when the device is in the Netherlands: time zone Europe/Amsterdam,
+//      or a preferred language with region NL (nl-NL, en-NL, …);
+//   3. the first Dutch or English entry in the browser's preferred languages;
+//   4. English.
+// Without JavaScript the two links below do the job.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
+import { langStorageKey } from '../i18n/ui';
+import { localeUrl } from '../i18n/utils';
 
-const placeholder =
-	'Voor een uitzending om meer bewustwording rondom epilepsie te creëren vroeg EpilepsieNL mij één van mijn pianostukken te spelen. Het stuk “Yesterday is gone” schreef ik ’s avonds nadat ik een hevige aanval had gehad en weerspiegeld de vergankelijkheid van tijd.';
+const nlUrl = localeUrl('nl');
+const enUrl = localeUrl('en');
 ---
 
-<BaseLayout title="Daan Cornelisse">
+<BaseLayout title="Daan Cornelisse" lang="en">
+	<script is:inline slot="head" define:vars={{ nlUrl, enUrl, langStorageKey }}>
+		var choice;
+		try {
+			choice = localStorage.getItem(langStorageKey);
+		} catch (e) {}
+		if (choice !== 'nl' && choice !== 'en') {
+			var prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+			var codes = [];
+			for (var i = 0; i < prefs.length; i++) codes.push(String(prefs[i]).toLowerCase());
+			var zone = '';
+			try {
+				zone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+			} catch (e) {}
+			var inNetherlands = zone === 'Europe/Amsterdam';
+			for (var j = 0; j < codes.length && !inNetherlands; j++) {
+				if (/-nl(-|$)/.test(codes[j])) inNetherlands = true;
+			}
+			choice = inNetherlands ? 'nl' : 'en';
+			for (var k = 0; k < codes.length && !inNetherlands; k++) {
+				if (codes[k].indexOf('nl') === 0) { choice = 'nl'; break; }
+				if (codes[k].indexOf('en') === 0) break;
+			}
+		}
+		location.replace((choice === 'nl' ? nlUrl : enUrl) + location.hash);
+	</script>
 	<main>
 		<Section>
-			<div class="flow">
-				<h2 class="centred">Mediums en Disciplines</h2>
-				<h3 class="accent-purple">Als het licht even uitgaat</h3>
-				<div class="text-columns flow">
-					<p>{placeholder}</p>
-					<p>{placeholder}</p>
-				</div>
-			</div>
-		</Section>
-
-		<Section variant="paper">
-			<div class="flow">
-				<h3 class="accent-white">Tijd Voor MAX</h3>
-				<div class="text-columns flow">
-					<p>{placeholder}</p>
-					<blockquote>
-						<p>“Als kind heb ik een hele slechte motoriek gehad, grappig dat je dan achter de piano belandt.”</p>
-					</blockquote>
-				</div>
-			</div>
-		</Section>
-
-		<Section>
-			<div class="flow">
-				<h3 class="accent-orange">Voor ik sluit</h3>
-				<div class="text-columns flow">
-					<p>{placeholder}</p>
-					<p>{placeholder}</p>
-				</div>
-			</div>
-		</Section>
-
-		<Section variant="paper" id="over-mij">
-			<div class="flow">
-				<h2 class="centred">Over mij</h2>
-				<p class="measure">{placeholder}</p>
-				<p class="measure">{placeholder}</p>
-			</div>
-		</Section>
-
-		<Section id="contact">
-			<div class="flow">
-				<h2 class="centred">Contact</h2>
-				<p class="measure">{placeholder}</p>
+			<div class="flow chooser">
+				<h1>Daan Cornelisse</h1>
+				<ul role="list">
+					<li><a href={nlUrl} hreflang="nl" lang="nl">Nederlands</a></li>
+					<li><a href={enUrl} hreflang="en">English</a></li>
+				</ul>
 			</div>
 		</Section>
 	</main>
 </BaseLayout>
 
 <style>
-	.centred {
+	.chooser {
+		min-height: 60vh;
+		display: grid;
+		place-content: center;
 		text-align: center;
 	}
 
-	.measure {
-		max-width: var(--measure);
+	ul {
+		display: flex;
+		justify-content: center;
+		gap: var(--space-m);
+		padding: 0;
+		list-style: none;
+		font-size: var(--step-1);
 	}
 
-	.accent-purple {
-		color: var(--color-accent-purple);
-	}
-
-	.accent-white {
-		color: var(--color-accent-white);
-	}
-
-	.accent-orange {
-		color: var(--color-accent-orange);
-	}
-
-	blockquote {
-		font-style: italic;
+	a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target);
 	}
 </style>

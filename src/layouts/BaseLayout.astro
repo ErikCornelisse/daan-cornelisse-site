@@ -5,27 +5,41 @@ import '@fontsource/source-serif-4/400-italic.css';
 import '@fontsource/source-serif-4/700.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
+import { languages, type Lang } from '../i18n/ui';
+import { absoluteLocaleUrl } from '../i18n/utils';
 
 interface Props {
 	title: string;
-	lang?: 'nl' | 'en';
+	lang: Lang;
 	description?: string;
+	/** Path without language prefix. When set, the page exists in every
+	    language and gets hreflang alternates and a canonical URL. */
+	path?: string;
 }
 
-const { title, lang = 'nl', description } = Astro.props;
+const { title, lang, description, path } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 // The GitHub Pages prototype stays out of search engines; the build for
 // Daan's own domain (BASE=/) is indexed.
 const noindex = base !== '/';
+const rootUrl = new URL(base, Astro.site).href;
+const alternates =
+	path === undefined
+		? []
+		: (Object.keys(languages) as Lang[]).map((l) => ({ lang: l, href: absoluteLocaleUrl(l, path) }));
 ---
 
 <html lang={lang}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<slot name="head" />
 		<title>{title}</title>
 		{description && <meta name="description" content={description} />}
 		{noindex && <meta name="robots" content="noindex" />}
+		{path !== undefined && <link rel="canonical" href={absoluteLocaleUrl(lang, path)} />}
+		{alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+		{alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={rootUrl} />}
 		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
 		<link rel="icon" href={`${base}favicon.ico`} />
 		<meta name="generator" content={Astro.generator} />

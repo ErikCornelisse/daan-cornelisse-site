@@ -24,7 +24,7 @@ Background, decisions and options: [phase 1 proposal](../analysis/phase1-static-
   Every phase is checked at 375, 768 and 1440 px.
 - Static output only: must run on GitHub Pages (sub-path) and plain
   mijndomein web hosting (domain root). Nothing server-side.
-- Language: browser language `nl*` → Dutch, otherwise English; a manual
+- Language: device in the Netherlands (time zone Europe/Amsterdam or region NL) or a Dutch browser language → Dutch, otherwise English; a manual
   switch overrides and is remembered. No geo-IP (not available on either host).
 - Contact form through a third-party form service (Web3Forms or Formspree).
 - No external trackers, embeds or font CDNs, so no cookie banner is needed.
@@ -39,7 +39,7 @@ Background, decisions and options: [phase 1 proposal](../analysis/phase1-static-
 |---|-------|----------|------------|--------|
 | 1 | [Repository and scaffold](phase-01-scaffold.md) | Astro project, GitHub repo, Pages deploy of a placeholder page | — | done (intent.md still open) |
 | 2 | [Tokens, fonts and bands](phase-02-tokens.md) | Design tokens, self-hosted fonts, cream/paper bands, mobile-first base | 1 | done |
-| 3 | [i18n skeleton](phase-03-i18n.md) | `/nl/` and `/en/`, root language chooser, switch, hreflang | 2 | todo |
+| 3 | [i18n skeleton](phase-03-i18n.md) | `/nl/` and `/en/`, root language chooser, switch, hreflang | 2 | done |
 | 4 | [Hero and header](phase-04-hero.md) | Art-directed hero, header nav, *Mijn verhaal* scroll link | 3 | todo |
 | 5 | [Work blocks](phase-05-works.md) | `works` collection and `WorkBlock` for the three works in both languages | 4 | todo |
 | 6 | [About and contact](phase-06-contact.md) | *Over mij*, e-mail, social links, contact form, brush button | 5 | todo |

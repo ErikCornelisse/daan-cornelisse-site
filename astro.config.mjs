@@ -12,4 +12,14 @@ export default defineConfig({
 	site,
 	base,
 	trailingSlash: 'always',
+	// Both languages live under a prefix (/nl/, /en/). The root page picks one
+	// from the browser language (src/pages/index.astro); English is the fallback.
+	i18n: {
+		locales: ['nl', 'en'],
+		defaultLocale: 'en',
+		routing: {
+			prefixDefaultLocale: true,
+			redirectToDefaultLocale: false,
+		},
+	},
 });
