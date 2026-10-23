@@ -1,12 +1,13 @@
 ---
-// Landing page in both languages. About and contact get their real content
-// in step 6 of phase 1.
+// Landing page in both languages: hero, works, about and contact.
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/Section.astro';
 import Header from '../../components/Header.astro';
 import Hero from '../../components/Hero.astro';
 import WorkBlock from '../../components/WorkBlock.astro';
+import About from '../../components/About.astro';
+import Contact from '../../components/Contact.astro';
 import { languages, type Lang } from '../../i18n/ui';
 import { useTranslations } from '../../i18n/utils';
 
@@ -16,8 +17,13 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
-const home = await getEntry('pages', `${lang}/home`);
-if (!home) throw new Error(`Missing src/content/pages/${lang}/home.md`);
+async function page(name: string) {
+	const entry = await getEntry('pages', `${lang}/${name}`);
+	if (!entry) throw new Error(`Missing src/content/pages/${lang}/${name}.md`);
+	return entry;
+}
+
+const [home, about, contact] = await Promise.all([page('home'), page('about'), page('contact')]);
 
 const works = (await getCollection('works', (w) => w.id.startsWith(`${lang}/`))).sort(
 	(a, b) => a.data.order - b.data.order,
@@ -25,12 +31,6 @@ const works = (await getCollection('works', (w) => w.id.startsWith(`${lang}/`)))
 
 // Bands alternate cream and paper from the first work onwards.
 const band = (index: number) => (index % 2 ? 'paper' : 'cream');
-
-// Temporary placeholder text until step 6.
-const placeholder = {
-	nl: 'Voor een uitzending om meer bewustwording rondom epilepsie te creëren vroeg EpilepsieNL mij één van mijn pianostukken te spelen. Het stuk “Yesterday is gone” schreef ik ’s avonds nadat ik een hevige aanval had gehad en weerspiegelt de vergankelijkheid van tijd.',
-	en: 'For a broadcast to raise awareness of epilepsy, EpilepsieNL asked me to play one of my piano pieces. I wrote “Yesterday is gone” one evening after a severe seizure; it reflects how fleeting time is.',
-}[lang];
 ---
 
 <BaseLayout title={t('site.title')} lang={lang} description={t('site.description')} path="">
@@ -54,18 +54,11 @@ const placeholder = {
 		}
 
 		<Section variant={band(works.length)} id={t('id.about')}>
-			<div class="flow">
-				<h2 class="centred">{t('section.about')}</h2>
-				<p class="measure">{placeholder}</p>
-				<p class="measure">{placeholder}</p>
-			</div>
+			<About page={about} />
 		</Section>
 
 		<Section variant={band(works.length + 1)} id={t('id.contact')}>
-			<div class="flow">
-				<h2 class="centred">{t('section.contact')}</h2>
-				<p class="measure">{placeholder}</p>
-			</div>
+			<Contact lang={lang} page={contact} />
 		</Section>
 	</main>
 </BaseLayout>
@@ -77,9 +70,5 @@ const placeholder = {
 
 	.works-heading {
 		margin-bottom: var(--space-l);
-	}
-
-	.measure {
-		max-width: var(--measure);
 	}
 </style>

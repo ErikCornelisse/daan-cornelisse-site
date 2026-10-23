@@ -1,0 +1,104 @@
+---
+// E-mail address and profile links with simple inline icons. No embeds or
+// third-party scripts: these are plain links.
+import site from '../data/site.json';
+import type { Lang } from '../i18n/ui';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+	lang: Lang;
+}
+
+const t = useTranslations(Astro.props.lang);
+
+const profiles = [
+	{
+		key: 'instagram',
+		href: site.social.instagram,
+		label: t('social.instagram'),
+		name: 'Instagram',
+		icon: 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm5.25-1.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z',
+	},
+	{
+		key: 'youtube',
+		href: site.social.youtube,
+		label: t('social.youtube'),
+		name: 'YouTube',
+		icon: 'M3.5 7.2c.2-1.4 1.2-2.3 2.6-2.4C8 4.6 10 4.5 12 4.5s4 .1 5.9.3c1.4.1 2.4 1 2.6 2.4.2 1.6.3 3.2.3 4.8s-.1 3.2-.3 4.8c-.2 1.4-1.2 2.3-2.6 2.4-1.9.2-3.9.3-5.9.3s-4-.1-5.9-.3c-1.4-.1-2.4-1-2.6-2.4-.2-1.6-.3-3.2-.3-4.8s.1-3.2.3-4.8ZM10 9v6l5.2-3L10 9Z',
+	},
+	{
+		key: 'linkedin',
+		href: site.social.linkedin,
+		label: t('social.linkedin'),
+		name: 'LinkedIn',
+		icon: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2.2 7.5V17h2.3v-6.5H7.2Zm1.15-3.6a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6ZM11.4 10.5V17h2.3v-3.4c0-1 .5-1.6 1.3-1.6s1.2.6 1.2 1.6V17h2.3v-3.9c0-1.9-1-2.8-2.5-2.8-1 0-1.8.5-2.2 1.1v-.9h-2.4Z',
+	},
+];
+---
+
+<div class="social">
+	<p class="social__email">
+		<span class="social__label">{t('contact.email')}</span>
+		<a href={`mailto:${site.email}`}>{site.email}</a>
+	</p>
+	<ul class="social__profiles" role="list" aria-label={t('contact.elsewhere')}>
+		{
+			profiles.map((p) => (
+				<li>
+					<a href={p.href} aria-label={p.label} rel="me noopener" target="_blank">
+						<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="currentColor" fill-rule="evenodd">
+							<path d={p.icon} />
+						</svg>
+						<span class="social__name">{p.name}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<style>
+	.social {
+		display: grid;
+		gap: var(--space-s);
+	}
+
+	.social__email {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: var(--space-xs);
+	}
+
+	.social__label {
+		font-family: var(--font-heading);
+	}
+
+	.social__email a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target);
+		overflow-wrap: anywhere;
+	}
+
+	.social__profiles {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs) var(--space-m);
+		padding: 0;
+		list-style: none;
+	}
+
+	.social__profiles a {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		min-height: var(--touch-target);
+		text-decoration: none;
+		font-family: var(--font-heading);
+	}
+
+	.social__profiles a:hover .social__name {
+		text-decoration: underline;
+	}
+</style>

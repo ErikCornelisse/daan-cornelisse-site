@@ -1,0 +1,13 @@
+{
+	"_comment": "Contact details and links. The e-mail address and profile URLs are placeholders until Daan supplies them. The Web3Forms access key is public by design; leave it empty to show the form without sending.",
+	"email": "daan@example.com",
+	"social": {
+		"instagram": "https://www.instagram.com/",
+		"youtube": "https://www.youtube.com/",
+		"linkedin": "https://www.linkedin.com/"
+	},
+	"contactForm": {
+		"endpoint": "https://api.web3forms.com/submit",
+		"accessKey": ""
+	}
+}
