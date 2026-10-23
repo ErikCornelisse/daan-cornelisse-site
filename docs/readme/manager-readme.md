@@ -24,13 +24,14 @@ dependencies installed (`npm install` in the repository root) for the preview.
 | Screen | Edits |
 |---|---|
 | Overzicht | Lists works and pages per language, starts/stops the preview, shows unpublished changes |
-| Werken | Accent colour, order, 1–2 images (upload, replace, remove, alt text per language), and title, discipline, quote and text in Dutch and English side by side; "Nieuw werk" adds one |
-| Pagina's | Opening image texts, About, Contact and Privacy in both languages |
+| Werken | Topics (today the works): accent colour, 1–2 images (upload, replace, remove, alt text per language), and title, discipline, quote and text in Dutch and English side by side; "Nieuw werk" adds one at the end of the first section with works |
+| Pagina's | Texts of every section in `page.json` (hero, sections, contact) and of the privacy page, in both languages |
 | Contact & links | E-mail address, Instagram, Spotify and LinkedIn links, Web3Forms key |
 | Stijl | Colours, heading and body font, text, heading and spacing size, content width; live contrast check; restore the original style |
 | Publiceren | Lists unpublished content changes (each can be undone), checks and builds the site, commits only the content files, pulls in changes from GitHub, pushes, and follows the GitHub Pages deploy |
 
-Edits are written straight into `src/content/`, `src/data/site.json` and
+Edits are written straight into `src/content/` (`page.json` for the
+structure, `sections/` and `topics/` for the texts), `src/data/site.json` and
 `src/assets/images/works/`. Comments and field order in the Markdown front
 matter are kept, so hand edits and manager edits can be mixed. The preview
 (Astro dev server) picks up every save immediately.

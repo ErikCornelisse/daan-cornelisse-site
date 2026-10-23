@@ -1,15 +1,15 @@
 ---
-// Landing page in both languages: hero, works, about and contact.
-import { getCollection, getEntry } from 'astro:content';
+// Landing page in both languages, built from src/content/page.json: the
+// hero, the sections in between, and contact (see src/lib/page.ts).
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Section from '../../components/Section.astro';
+import Band from '../../components/Band.astro';
+import Contact from '../../components/Contact.astro';
+import ContentSection from '../../components/ContentSection.astro';
 import Header from '../../components/Header.astro';
 import Hero from '../../components/Hero.astro';
-import WorkBlock from '../../components/WorkBlock.astro';
-import About from '../../components/About.astro';
-import Contact from '../../components/Contact.astro';
 import { languages, type Lang } from '../../i18n/ui';
 import { useTranslations } from '../../i18n/utils';
+import { loadPage } from '../../lib/page';
 
 export function getStaticPaths() {
 	return (Object.keys(languages) as Lang[]).map((lang) => ({ params: { lang } }));
@@ -17,58 +17,29 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
-async function page(name: string) {
-	const entry = await getEntry('pages', `${lang}/${name}`);
-	if (!entry) throw new Error(`Missing src/content/pages/${lang}/${name}.md`);
-	return entry;
-}
-
-const [home, about, contact] = await Promise.all([page('home'), page('about'), page('contact')]);
-
-const works = (await getCollection('works', (w) => w.id.startsWith(`${lang}/`))).sort(
-	(a, b) => a.data.order - b.data.order,
-);
-
-// Bands alternate cream and paper from the first work onwards.
-const band = (index: number) => (index % 2 ? 'paper' : 'cream');
+const page = await loadPage(lang);
 ---
 
 <BaseLayout title={t('site.title')} lang={lang} description={t('site.description')} path="">
 	<Header lang={lang} overlay />
 	<main>
-		<Hero
-			title={home.data.title}
-			subtitle={home.data.subtitle}
-			cta={home.data.cta}
-			ctaHref={`#${t('id.about')}`}
-			imageAlt={home.data.imageAlt ?? ''}
-		/>
-
 		{
-			works.map((work, i) => (
-				<Section variant={band(i)}>
-					{i === 0 && <h2 class="centred works-heading">{t('section.works')}</h2>}
-					<WorkBlock work={work} />
-				</Section>
-			))
+			page.sections.map((section) => {
+				if (section.ref.type === 'hero') return <Hero section={section} linkAnchor={page.heroLink} />;
+				if (section.ref.type === 'contact')
+					return (
+						<section
+							id={section.anchor}
+							aria-labelledby={section.headingId}
+							lang={section.fallback ? section.lang : undefined}
+						>
+							<Band variant={section.band}>
+								<Contact lang={lang} section={section} />
+							</Band>
+						</section>
+					);
+				return <ContentSection section={section} />;
+			})
 		}
-
-		<Section variant={band(works.length)} id={t('id.about')}>
-			<About page={about} />
-		</Section>
-
-		<Section variant={band(works.length + 1)} id={t('id.contact')}>
-			<Contact lang={lang} page={contact} />
-		</Section>
 	</main>
 </BaseLayout>
-
-<style>
-	.centred {
-		text-align: center;
-	}
-
-	.works-heading {
-		margin-bottom: var(--space-l);
-	}
-</style>

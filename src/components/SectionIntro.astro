@@ -1,0 +1,75 @@
+---
+// The heading of a section with its own text and image: image above the
+// text on phones, side by side from 48rem (today's "Over mij"). Without an
+// image the text runs in a single readable column.
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import type { ResolvedSection } from '../lib/page';
+
+interface Props {
+	section: ResolvedSection;
+}
+
+const { section } = Astro.props;
+const { title, image } = section.entry.data;
+const { Content } = await render(section.entry);
+---
+
+<div class:list={['intro', { 'intro--image': image }]}>
+	<h2 class="intro__title" id={section.headingId}>{title}</h2>
+	{
+		image && (
+			<Image
+				class="intro__image"
+				src={image.src}
+				alt={image.alt}
+				widths={[400, 560, 680]}
+				sizes="(min-width: 48rem) 22rem, 100vw"
+			/>
+		)
+	}
+	<div class="intro__text flow">
+		<Content />
+	</div>
+</div>
+
+<style>
+	.intro {
+		display: grid;
+		gap: var(--space-l);
+	}
+
+	.intro__title {
+		text-align: center;
+	}
+
+	.intro__image {
+		width: 100%;
+		max-width: 26rem;
+		margin-inline: auto;
+	}
+
+	.intro__text {
+		max-width: var(--measure);
+	}
+
+	.intro:not(.intro--image) .intro__text {
+		margin-inline: auto;
+	}
+
+	@media (min-width: 48rem) {
+		.intro--image {
+			grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+			column-gap: var(--space-l);
+			align-items: start;
+		}
+
+		.intro__title {
+			grid-column: 1 / -1;
+		}
+
+		.intro__image {
+			margin: 0;
+		}
+	}
+</style>

@@ -2,24 +2,25 @@
 // Contact section: intro text with e-mail and profile links, and the brush
 // button from the mockup. The button opens the contact form underneath it
 // (a <details> element, so it works without JavaScript).
-import { render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import ContactForm from './ContactForm.astro';
 import SocialLinks from './SocialLinks.astro';
 import type { Lang } from '../i18n/ui';
 import { useTranslations } from '../i18n/utils';
+import type { ResolvedSection } from '../lib/page';
 
 interface Props {
 	lang: Lang;
-	page: CollectionEntry<'pages'>;
+	section: ResolvedSection;
 }
 
-const { lang, page } = Astro.props;
+const { lang, section } = Astro.props;
 const t = useTranslations(lang);
-const { Content } = await render(page);
+const { Content } = await render(section.entry);
 ---
 
 <div class="contact">
-	<h2 class="contact__title">{page.data.title}</h2>
+	<h2 class="contact__title" id={section.headingId}>{section.entry.data.title}</h2>
 	<div class="contact__intro flow">
 		<Content />
 		<SocialLinks lang={lang} />

@@ -4,7 +4,6 @@
 title: Tijd Voor MAX
 discipline: Music
 accent: brown
-order: 2
 images:
   - src: ../../../assets/images/works/tijd-voor-max-tv.jpg
     alt: Daan plays the grand piano in the Tijd voor MAX studio during a broadcast for EpilepsieNL.

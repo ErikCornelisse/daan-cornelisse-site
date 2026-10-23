@@ -34,25 +34,71 @@ templates.env.globals.update(langs=LANGS, accents=validation.ACCENTS)
 LANG_NAMES = {"nl": "Nederlands", "en": "English"}
 templates.env.globals["lang_names"] = LANG_NAMES
 
-# Which fields each page has, as (front matter key, label); body is separate.
-PAGE_FIELDS = {
-    "home": [
-        ("title", "Titel"),
-        ("subtitle", "Ondertitel"),
-        ("cta", "Linktekst"),
-        ("imageAlt", "Beschrijving van de foto"),
-    ],
-    "about": [("title", "Titel"), ("imageAlt", "Beschrijving van het portret")],
-    "contact": [("title", "Titel")],
-    "privacy": [("title", "Titel")],
-}
-PAGE_HAS_BODY = {"home": False, "about": True, "contact": True, "privacy": True}
-PAGE_LABELS = {
-    "home": "Openingsbeeld",
-    "about": "Over mij",
-    "contact": "Contact",
-    "privacy": "Privacyverklaring",
-}
+
+# Editable texts per kind of entry, as (front matter key, label); a dotted key
+# is a nested field ("image.alt"). The full section editors follow in step 3
+# of the sections plan; until then these screens edit the texts only.
+def page_definition(name: str) -> dict | None:
+    """What the Pagina's screen edits for a section id or a standalone page."""
+    if name in PAGE_NAMES:
+        return {
+            "collection": "pages",
+            "label": "Privacyverklaring",
+            "type": "page",
+            "fields": [("title", "Titel")],
+            "body": True,
+        }
+    section = next((s for s in content.sections() if s["id"] == name), None)
+    if section is None:
+        return None
+    entry = content.get("sections", "nl", name)
+    title = str(entry.data.get("title", name)) if entry else name
+    if section["type"] == "hero":
+        return {
+            "collection": "sections",
+            "label": "Openingsbeeld",
+            "type": "hero",
+            "body": False,
+            "fields": [
+                ("title", "Titel"),
+                ("subtitle", "Ondertitel"),
+                ("cta", "Linktekst"),
+                ("image.alt", "Beschrijving van de foto"),
+            ],
+        }
+    fields = [("title", "Kop")]
+    if entry and entry.data.get("image"):
+        fields.append(("image.alt", "Beschrijving van de afbeelding"))
+    label = "Contact" if section["type"] == "contact" else title
+    return {
+        "collection": "sections",
+        "label": label,
+        "type": section["type"],
+        "fields": fields,
+        "body": True,
+    }
+
+
+def page_names() -> list[str]:
+    return [s["id"] for s in content.sections()] + list(PAGE_NAMES)
+
+
+def get_field(data: dict, key: str) -> str:
+    for part in key.split("."):
+        data = data.get(part) if isinstance(data, dict) else None
+    return "" if data is None else str(data)
+
+
+def set_field(data: dict, key: str, value: str) -> None:
+    *parents, last = key.split(".")
+    for part in parents:
+        data = data.setdefault(part, CommentedMap())
+    if value:
+        data[last] = value
+    elif not parents:
+        data.pop(last, None)
+    else:
+        data[last] = value  # nested values such as an alt text stay, so validation can flag them
 
 
 def redirect(url: str, message: str) -> RedirectResponse:
@@ -78,14 +124,17 @@ def overview(request: Request, bericht: str = ""):
         "overview.html",
         {
             "message": bericht,
-            "works": content.works(),
+            "works": content.topics(),
             "pages": [
                 (
                     name,
-                    PAGE_LABELS[name],
-                    {lang: content.get("pages", lang, name) for lang in LANGS},
+                    page_definition(name)["label"],
+                    {
+                        lang: content.get(page_definition(name)["collection"], lang, name)
+                        for lang in LANGS
+                    },
                 )
-                for name in PAGE_NAMES
+                for name in page_names()
             ],
             "changes": pending_changes(settings.site_root),
             "unpushed": publisher.unpushed(),
@@ -143,7 +192,6 @@ def work_view(nl: Entry | None, en: Entry | None) -> dict:
         }
     return {
         "accent": base.data.get("accent", "purple") if base else "purple",
-        "order": base.data.get("order", "") if base else "",
         "images": images,
         "texts": texts,
     }
@@ -174,7 +222,7 @@ def new_work(request: Request):
 
 @app.get("/werken/{slug}", response_class=HTMLResponse)
 def edit_work(request: Request, slug: str, bericht: str = ""):
-    nl, en = content.get("works", "nl", slug), content.get("works", "en", slug)
+    nl, en = content.get("topics", "nl", slug), content.get("topics", "en", slug)
     if not nl and not en:
         raise HTTPException(404)
     return render_work(request, slug, work_view(nl, en), [], bericht)
@@ -212,14 +260,11 @@ async def images_from_form(form: FormData, entry_path: Path) -> tuple[list[dict]
     return images, errors
 
 
-def apply_work(
-    entry: Entry, lang: str, form: FormData, images: list[dict], accent: str, order
-) -> None:
+def apply_work(entry: Entry, lang: str, form: FormData, images: list[dict], accent: str) -> None:
     data = entry.data
     for key in ("title", "discipline"):
         data[key] = str(form.get(f"{lang}_{key}", "")).strip()
     data["accent"] = accent
-    data["order"] = order
     data["images"] = [
         CommentedMap([("src", image["src"]), ("alt", image["alt"][lang])]) for image in images
     ]
@@ -256,25 +301,14 @@ async def save_work(request: Request, slug: str | None):
     creating = slug is None
     if creating:
         slug = safe_stem(str(form.get("nl_title", "")))
-        if content.get("works", "nl", slug) or content.get("works", "en", slug):
-            slug = f"{slug}-{len(content.slugs('works')) + 1}"
+        if content.get("topics", "nl", slug) or content.get("topics", "en", slug):
+            slug = f"{slug}-{len(content.slugs('topics')) + 1}"
     entries = {
-        lang: content.get("works", lang, slug) or new_entry("works", lang, slug) for lang in LANGS
+        lang: content.get("topics", lang, slug) or new_entry("topics", lang, slug) for lang in LANGS
     }
 
     images, errors = await images_from_form(form, entries["nl"].path)
     accent = str(form.get("accent", ""))
-    try:
-        order = int(str(form.get("order", "")).strip())
-    except ValueError:
-        order = None
-    if order is None and creating:
-        order = (
-            max(
-                (int((p["nl"] or p["en"]).data.get("order", 0)) for p in content.works()), default=0
-            )
-            + 1
-        )
 
     to_save = []
     for lang, entry in entries.items():
@@ -282,7 +316,7 @@ async def save_work(request: Request, slug: str | None):
         # unless the file already exists.
         if not entry.path.exists() and not has_text(form, lang):
             continue
-        apply_work(entry, lang, form, images, accent, order)
+        apply_work(entry, lang, form, images, accent)
         errors += [
             f"{LANG_NAMES[lang]}: {e}" for e in validation.check_work(entry.data, entry.path)
         ]
@@ -308,6 +342,8 @@ async def save_work(request: Request, slug: str | None):
 
     for entry in to_save:
         content.save(entry)
+    if creating:
+        content.place_topic(slug)
     return redirect(f"/werken/{slug}", "Opgeslagen.")
 
 
@@ -315,18 +351,23 @@ async def save_work(request: Request, slug: str | None):
 
 
 def render_page(request: Request, name: str, values: dict, errors: list[str], message: str = ""):
+    definition = page_definition(name)
+    anchor = ""
+    if definition["collection"] == "sections" and definition["type"] != "hero":
+        entry = content.get("sections", "nl", name)
+        anchor = f"#{entry.data.get('anchor', '')}" if entry else ""
     return templates.TemplateResponse(
         request,
         "page.html",
         {
             "name": name,
-            "label": PAGE_LABELS[name],
-            "fields": PAGE_FIELDS[name],
-            "has_body": PAGE_HAS_BODY[name],
+            "label": definition["label"],
+            "fields": definition["fields"],
+            "has_body": definition["body"],
             "values": values,
             "errors": errors,
             "message": message,
-            "preview_url": preview_url(request, "nl", "privacy/" if name == "privacy" else ""),
+            "preview_url": preview_url(request, "nl", "privacy/" if name == "privacy" else anchor),
         },
         status_code=422 if errors else 200,
     )
@@ -334,13 +375,14 @@ def render_page(request: Request, name: str, values: dict, errors: list[str], me
 
 @app.get("/paginas/{name}", response_class=HTMLResponse)
 def edit_page(request: Request, name: str, bericht: str = ""):
-    if name not in PAGE_NAMES:
+    definition = page_definition(name)
+    if definition is None:
         raise HTTPException(404)
     values = {}
     for lang in LANGS:
-        entry = content.get("pages", lang, name)
+        entry = content.get(definition["collection"], lang, name)
         values[lang] = (
-            {key: str(entry.data.get(key, "")) for key, _ in PAGE_FIELDS[name]} if entry else {}
+            {key: get_field(entry.data, key) for key, _ in definition["fields"]} if entry else {}
         )
         values[lang]["body"] = entry.body.strip("\n") if entry else ""
     return render_page(request, name, values, [], bericht)
@@ -348,22 +390,22 @@ def edit_page(request: Request, name: str, bericht: str = ""):
 
 @app.post("/paginas/{name}", response_class=HTMLResponse)
 async def save_page(request: Request, name: str):
-    if name not in PAGE_NAMES:
+    definition = page_definition(name)
+    if definition is None:
         raise HTTPException(404)
     form = await request.form()
     errors, entries, values = [], [], {}
     for lang in LANGS:
-        entry = content.get("pages", lang, name) or new_entry("pages", lang, name)
+        entry = content.get(definition["collection"], lang, name) or new_entry(
+            definition["collection"], lang, name
+        )
         values[lang] = {
-            key: str(form.get(f"{lang}_{key}", "")).strip() for key, _ in PAGE_FIELDS[name]
+            key: str(form.get(f"{lang}_{key}", "")).strip() for key, _ in definition["fields"]
         }
         values[lang]["body"] = str(form.get(f"{lang}_body", "")).replace("\r\n", "\n")
-        for key, _ in PAGE_FIELDS[name]:
-            if values[lang][key]:
-                entry.data[key] = values[lang][key]
-            else:
-                entry.data.pop(key, None)
-        if PAGE_HAS_BODY[name]:
+        for key, _ in definition["fields"]:
+            set_field(entry.data, key, values[lang][key])
+        if definition["body"]:
             entry.body = values[lang]["body"]
         errors += [f"{LANG_NAMES[lang]}: {e}" for e in validation.check_page(entry.data)]
         entries.append(entry)
@@ -422,12 +464,16 @@ async def save_contact(request: Request):
 
 
 def works_on_bands() -> list[tuple[str, str, str]]:
-    """(title, accent, band) for each work, with bands alternating as on the page."""
+    """(title, accent, band) for each topic on the page, with the band it sits on."""
+    bands = content.bands()
     result = []
-    for index, pair in enumerate(content.works()):
+    for topic_id, pair in zip(content.topic_ids(), content.topics()):
         entry = pair["nl"] or pair["en"]
-        band = "paper" if index % 2 else "cream"
-        result.append((str(entry.data.get("title", "")), str(entry.data.get("accent", "")), band))
+        band = bands.get(f"topic:{topic_id}")
+        if entry and band:
+            result.append(
+                (str(entry.data.get("title", "")), str(entry.data.get("accent", "")), band)
+            )
     return [w for w in result if w[1] in validation.ACCENTS]
 
 

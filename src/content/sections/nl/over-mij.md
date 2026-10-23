@@ -2,7 +2,10 @@
 # Text from daniel-cornelisse.nl/about.html (May 2024), with the exhibition
 # sentence put in the past tense and the venue name corrected.
 title: Over mij
-imageAlt: Portret van Daan in een herfstig park, als dubbele belichting met de bomen achter hem.
+anchor: over-mij
+image:
+  src: ../../../assets/images/portret.jpg
+  alt: Portret van Daan in een herfstig park, als dubbele belichting met de bomen achter hem.
 ---
 ### Mijn werk
 

@@ -1,5 +1,5 @@
-// Interface strings per language. Page content (texts about the works, about
-// Daan, contact) lives in src/content/; only labels and fixed headings are here.
+// Interface strings per language. Page content, including section headings,
+// anchors and menu labels, lives in src/content/; only fixed labels are here.
 
 export const languages = {
 	nl: 'Nederlands',
@@ -17,11 +17,6 @@ const nl = {
 	'site.title': 'Daan Cornelisse',
 	'site.description': 'Daan Cornelisse maakt illustraties, muziek en digitale kunst over wat je van buiten niet ziet.',
 	'nav.label': 'Hoofdmenu',
-	'nav.about': 'Over mij',
-	'nav.contact': 'Contact',
-	'section.works': 'Mediums en Disciplines',
-	'id.about': 'over-mij',
-	'id.contact': 'contact',
 	'lang.switch': 'Deze pagina in het Nederlands',
 	'contact.open': 'Neem contact op',
 	'contact.email': 'E-mail',
@@ -49,11 +44,6 @@ const en: Record<keyof typeof nl, string> = {
 	'site.title': 'Daan Cornelisse',
 	'site.description': 'Daan Cornelisse makes illustrations, music and digital art about what you cannot see from the outside.',
 	'nav.label': 'Main menu',
-	'nav.about': 'About me',
-	'nav.contact': 'Contact',
-	'section.works': 'Media and Disciplines',
-	'id.about': 'about',
-	'id.contact': 'contact',
 	'lang.switch': 'This page in English',
 	'contact.open': 'Contact me',
 	'contact.email': 'E-mail',

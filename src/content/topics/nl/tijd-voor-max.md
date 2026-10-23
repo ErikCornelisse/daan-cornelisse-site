@@ -4,7 +4,6 @@
 title: Tijd Voor MAX
 discipline: Muziek
 accent: brown
-order: 2
 images:
   - src: ../../../assets/images/works/tijd-voor-max-tv.jpg
     alt: Daan speelt vleugel in de studio van Tijd voor MAX tijdens een uitzending voor EpilepsieNL.

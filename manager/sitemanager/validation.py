@@ -19,8 +19,6 @@ def check_work(data: dict, entry_path: Path) -> list[str]:
             errors.append(f"{label} is verplicht.")
     if data.get("accent") not in ACCENTS:
         errors.append("Kies een accentkleur.")
-    if not isinstance(data.get("order"), int):
-        errors.append("Volgorde moet een heel getal zijn.")
     images = data.get("images") or []
     if not 1 <= len(images) <= MAX_IMAGES:
         errors.append(f"Een werk heeft 1 of {MAX_IMAGES} afbeeldingen.")

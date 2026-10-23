@@ -1,6 +1,7 @@
 ---
 // Full-width band with one of the two mockup backgrounds; content sits in
-// the centred container.
+// the centred container. A band is only visual: sections and topics supply
+// the structure (<section>, <article>) around or inside it.
 interface Props {
 	variant?: 'cream' | 'paper';
 	id?: string;
@@ -11,11 +12,11 @@ const { variant = 'cream', id, class: className } = Astro.props;
 const texture = `url(${import.meta.env.BASE_URL.replace(/\/?$/, '/')}textures/paper.svg)`;
 ---
 
-<section id={id} class:list={['band', `band--${variant}`, className]} style={`--paper-texture: ${texture}`}>
+<div id={id} class:list={['band', `band--${variant}`, className]} style={`--paper-texture: ${texture}`}>
 	<div class="container">
 		<slot />
 	</div>
-</section>
+</div>
 
 <style>
 	.band {

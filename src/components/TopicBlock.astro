@@ -1,6 +1,6 @@
 ---
-// One work: title in its accent colour, text, one or two images and an
-// optional quote. Phones stack everything. From 64rem the layout follows the
+// One topic (today: a work): title in its accent colour, text, one or two
+// images and an optional quote. Phones stack everything. From 64rem the layout follows the
 // number of images, as in the mockup:
 //   one image  → text in two columns, image on the right;
 //   two images → text in one column, images side by side with the quote
@@ -9,19 +9,21 @@ import { Image } from 'astro:assets';
 import { render, type CollectionEntry } from 'astro:content';
 
 interface Props {
-	work: CollectionEntry<'works'>;
+	topic: CollectionEntry<'topics'>;
+	/** Set when the text is shown in another language than the page (Dutch fallback). */
+	lang?: string;
 }
 
-const { work } = Astro.props;
-const { title, accent, images, quote } = work.data;
-const { Content } = await render(work);
+const { topic, lang } = Astro.props;
+const { title, accent, images, quote } = topic.data;
+const { Content } = await render(topic);
 const [first, second] = images;
 const sizes = second
 	? '(min-width: 64rem) 22rem, (min-width: 48rem) 45vw, 100vw'
 	: '(min-width: 64rem) 22rem, (min-width: 48rem) 26rem, 100vw';
 ---
 
-<article class:list={['work', { 'work--two': second }]} style={`--accent: var(--color-accent-${accent})`}>
+<article class:list={['work', { 'work--two': second }]} style={`--accent: var(--color-accent-${accent})`} lang={lang}>
 	<h3 class="work__title">{title}</h3>
 	<div class="work__text text-columns flow">
 		<Content />

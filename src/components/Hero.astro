@@ -1,41 +1,46 @@
 ---
-// Full-bleed photo with title block. Phones get a portrait crop, wider
-// screens the wide crop; the bottom edge fades into the cream band below.
-// The two crops are placeholders cut from the mockup until Daan's photos arrive.
+// The hero: full-bleed photo with title block, always the first section.
+// Phones get the portrait crop when there is one, otherwise the wide photo;
+// the bottom edge fades into the first band. Content comes from
+// src/content/sections/<lang>/hero.md.
 import { getImage } from 'astro:assets';
-import portrait from '../assets/images/hero-portrait.jpg';
-import wide from '../assets/images/hero-wide.jpg';
+import type { ResolvedSection } from '../lib/page';
 
 interface Props {
-	title: string;
-	subtitle?: string;
-	cta?: string;
-	ctaHref?: string;
-	imageAlt: string;
+	section: ResolvedSection;
+	/** Anchor of the section the hero's link points to. */
+	linkAnchor?: string;
 }
 
-const { title, subtitle, cta, ctaHref, imageAlt } = Astro.props;
+const { section, linkAnchor } = Astro.props;
+const { title, subtitle, cta, image, portrait } = section.entry.data;
+const ctaHref = linkAnchor ? `#${linkAnchor}` : undefined;
 
-const portraitImg = await getImage({ src: portrait, widths: [480, 760], format: 'webp', quality: 72 });
-const wideImg = await getImage({ src: wide, widths: [1024, 1600, 2400], format: 'webp', quality: 72 });
+const phone = portrait ?? image?.src;
+const phoneImg = phone && (await getImage({ src: phone, widths: [480, 760], format: 'webp', quality: 72 }));
+const wideImg = image && (await getImage({ src: image.src, widths: [1024, 1600, 2400], format: 'webp', quality: 72 }));
 ---
 
-<section class="hero">
-	<picture>
-		<source media="(min-width: 48rem)" srcset={wideImg.srcSet.attribute} sizes="100vw" type="image/webp" />
-		<img
-			src={portraitImg.src}
-			srcset={portraitImg.srcSet.attribute}
-			sizes="100vw"
-			width={portrait.width}
-			height={portrait.height}
-			alt={imageAlt}
-			fetchpriority="high"
-			decoding="async"
-		/>
-	</picture>
+<section class="hero" aria-labelledby={section.headingId} lang={section.fallback ? section.lang : undefined}>
+	{
+		phone && phoneImg && wideImg && (
+			<picture>
+				<source media="(min-width: 48rem)" srcset={wideImg.srcSet.attribute} sizes="100vw" type="image/webp" />
+				<img
+					src={phoneImg.src}
+					srcset={phoneImg.srcSet.attribute}
+					sizes="100vw"
+					width={phone.width}
+					height={phone.height}
+					alt={image?.alt ?? ''}
+					fetchpriority="high"
+					decoding="async"
+				/>
+			</picture>
+		)
+	}
 	<div class="hero__text container">
-		<h1>{title}</h1>
+		<h1 id={section.headingId}>{title}</h1>
 		{subtitle && <p class="hero__subtitle">{subtitle}</p>}
 		{cta && ctaHref && <a class="hero__cta" href={ctaHref}>{cta}</a>}
 	</div>

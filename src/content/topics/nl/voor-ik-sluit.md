@@ -3,7 +3,6 @@
 title: Voor ik sluit
 discipline: Digitale kunst
 accent: orange
-order: 3
 images:
   - src: ../../../assets/images/works/voor-ik-sluit.jpg
     alt: Digitaal kunstwerk van rode, groene en blauwe lijnen die uitwaaieren vanuit een donker middelpunt.

@@ -3,7 +3,7 @@
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
-import Section from '../../components/Section.astro';
+import Band from '../../components/Band.astro';
 import { languages, type Lang } from '../../i18n/ui';
 import { useTranslations } from '../../i18n/utils';
 
@@ -26,12 +26,12 @@ const { Content } = await render(page);
 >
 	<Header lang={lang} />
 	<main>
-		<Section>
+		<Band>
 			<article class="prose flow">
 				<h1>{page.data.title}</h1>
 				<Content />
 			</article>
-		</Section>
+		</Band>
 	</main>
 </BaseLayout>
 

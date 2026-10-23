@@ -3,7 +3,6 @@
 title: Als het licht even uitgaat
 discipline: Illustratie
 accent: purple
-order: 1
 images:
   - src: ../../../assets/images/works/vaas-masker.png
     alt: Tekening van een gebarsten masker naast een vaas met paarse anemonen.

@@ -1,7 +1,10 @@
 ---
 # Draft translation of daniel-cornelisse.nl/about.html; for Daan to review.
 title: About me
-imageAlt: Portrait of Daan in an autumn park, as a double exposure with the trees behind him.
+anchor: about
+image:
+  src: ../../../assets/images/portret.jpg
+  alt: Portrait of Daan in an autumn park, as a double exposure with the trees behind him.
 ---
 ### My work
 

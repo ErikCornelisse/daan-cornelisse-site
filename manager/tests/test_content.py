@@ -15,15 +15,25 @@ def test_round_trip_keeps_files_identical(path: Path):
     assert render(parse(path, collection, lang)) == path.read_text(encoding="utf-8")
 
 
-def test_works_come_in_page_order_with_both_languages():
-    works = CONTENT.works()
-    orders = [pair["nl"].data["order"] for pair in works]
-    assert orders == sorted(orders)
-    assert all(pair[lang] is not None for pair in works for lang in LANGS)
+def test_topics_come_in_page_order_with_both_languages():
+    topics = CONTENT.topics()
+    assert CONTENT.topic_ids() == ["als-het-licht-even-uitgaat", "tijd-voor-max", "voor-ik-sluit"]
+    assert all(pair[lang] is not None for pair in topics for lang in LANGS)
+
+
+def test_bands_match_the_site():
+    assert CONTENT.bands() == {
+        "topic:als-het-licht-even-uitgaat": "cream",
+        "topic:tijd-voor-max": "paper",
+        "topic:voor-ik-sluit": "cream",
+        "section:mediums": "cream",
+        "section:over-mij": "paper",
+        "section:contact": "cream",
+    }
 
 
 def test_relative_image_src_matches_hand_written_paths():
-    entry = CONTENT.get("works", "nl", "voor-ik-sluit")
+    entry = CONTENT.get("topics", "nl", "voor-ik-sluit")
     image = CONTENT.resolve_image(entry.path, entry.data["images"][0]["src"])
     assert image.exists()
     assert CONTENT.relative_image_src(entry.path, image) == entry.data["images"][0]["src"]
@@ -31,4 +41,4 @@ def test_relative_image_src_matches_hand_written_paths():
 
 def test_rejects_unsafe_names():
     with pytest.raises(ValueError):
-        CONTENT.path_for("works", "nl", "../secret")
+        CONTENT.path_for("topics", "nl", "../secret")

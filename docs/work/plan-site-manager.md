@@ -90,7 +90,9 @@ for progress.
 - [x] Restore the original style — _done when:_ tokens and fonts module are identical to the originals
 
 ## Phases 4, 6–8
-Detailed when the previous phase is done.
+Detailed when the previous phase is done. Before phase 4, the content model
+changes to sections and topics: see [plan-sections.md](plan-sections.md);
+its steps 2–4 replace the Werken and Pagina's screens.
 
 ## Open questions
 1. ~~Commit author.~~ Configurable with `PUBLISH_AUTHOR`; empty uses the

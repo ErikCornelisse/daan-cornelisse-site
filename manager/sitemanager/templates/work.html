@@ -18,9 +18,8 @@
 					{% endfor %}
 				</select>
 			</label>
-			<label>Volgorde op de pagina
-				<input name="order" type="number" min="1" value="{{ work.order }}" {% if slug %}required{% endif %}>
-			</label>
+			<p class="hint">De plaats op de pagina (sectie en volgorde) staat in de pagina-indeling.
+				{% if not slug %}Een nieuw werk komt achteraan in de eerste sectie met werken.{% endif %}</p>
 		</div>
 	</section>
 

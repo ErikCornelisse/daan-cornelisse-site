@@ -3,7 +3,6 @@
 title: When the light goes out for a moment
 discipline: Illustration
 accent: purple
-order: 1
 images:
   - src: ../../../assets/images/works/vaas-masker.png
     alt: Drawing of a cracked mask beside a vase with purple anemones.

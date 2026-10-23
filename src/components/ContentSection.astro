@@ -1,0 +1,57 @@
+---
+// A section between the hero and contact: its heading, its own text and
+// image (optional, in one band, subheadings included), then its topics, each
+// in a band of its own. Without own text the heading opens the first topic's
+// band, as "Mediums en Disciplines" does.
+import Band from './Band.astro';
+import SectionIntro from './SectionIntro.astro';
+import TopicBlock from './TopicBlock.astro';
+import type { ResolvedSection } from '../lib/page';
+
+interface Props {
+	section: ResolvedSection;
+}
+
+const { section } = Astro.props;
+const { title } = section.entry.data;
+const headingInFirstTopic = !section.hasOwnContent && section.topics.length > 0;
+---
+
+<section id={section.anchor} aria-labelledby={section.headingId} lang={section.fallback ? section.lang : undefined}>
+	{
+		section.hasOwnContent && (
+			<Band variant={section.band}>
+				<SectionIntro section={section} />
+			</Band>
+		)
+	}
+	{
+		!section.hasOwnContent && !section.topics.length && (
+			<Band variant={section.band}>
+				<h2 class="section-heading" id={section.headingId}>{title}</h2>
+			</Band>
+		)
+	}
+	{
+		section.topics.map((topic, index) => (
+			<Band variant={topic.band}>
+				{index === 0 && headingInFirstTopic && (
+					<h2 class="section-heading section-heading--opening" id={section.headingId}>
+						{title}
+					</h2>
+				)}
+				<TopicBlock topic={topic.entry} lang={topic.fallback ? topic.lang : undefined} />
+			</Band>
+		))
+	}
+</section>
+
+<style>
+	.section-heading {
+		text-align: center;
+	}
+
+	.section-heading--opening {
+		margin-bottom: var(--space-l);
+	}
+</style>

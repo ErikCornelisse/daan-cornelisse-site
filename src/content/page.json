@@ -1,0 +1,29 @@
+{
+	"_comment": "Structure of the landing page: sections in order, the hero always first and contact always last. Texts are in sections/<lang>/<id>.md and topics/<lang>/<id>.md. Edited by the site manager.",
+	"sections": [
+		{
+			"id": "hero",
+			"type": "hero",
+			"link": "over-mij"
+		},
+		{
+			"id": "mediums",
+			"type": "section",
+			"topics": [
+				"als-het-licht-even-uitgaat",
+				"tijd-voor-max",
+				"voor-ik-sluit"
+			]
+		},
+		{
+			"id": "over-mij",
+			"type": "section",
+			"menu": true
+		},
+		{
+			"id": "contact",
+			"type": "contact",
+			"menu": true
+		}
+	]
+}

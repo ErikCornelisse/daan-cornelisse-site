@@ -3,7 +3,6 @@
 title: Before I close
 discipline: Digital art
 accent: orange
-order: 3
 images:
   - src: ../../../assets/images/works/voor-ik-sluit.jpg
     alt: Digital artwork of red, green and blue lines fanning out from a dark centre.

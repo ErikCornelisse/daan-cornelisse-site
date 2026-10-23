@@ -7,7 +7,7 @@
 //   4. English.
 // Without JavaScript the two links below do the job.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Section from '../components/Section.astro';
+import Band from '../components/Band.astro';
 import { langStorageKey } from '../i18n/ui';
 import { localeUrl } from '../i18n/utils';
 
@@ -42,7 +42,7 @@ const enUrl = localeUrl('en');
 		location.replace((choice === 'nl' ? nlUrl : enUrl) + location.hash);
 	</script>
 	<main>
-		<Section>
+		<Band>
 			<div class="flow chooser">
 				<h1>Daan Cornelisse</h1>
 				<ul role="list">
@@ -50,7 +50,7 @@ const enUrl = localeUrl('en');
 					<li><a href={enUrl} hreflang="en">English</a></li>
 				</ul>
 			</div>
-		</Section>
+		</Band>
 	</main>
 </BaseLayout>
 
