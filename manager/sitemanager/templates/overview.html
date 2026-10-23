@@ -61,7 +61,9 @@
 	{% if changes %}
 	<p>Deze bestanden zijn gewijzigd sinds de laatste publicatie:</p>
 	<ul class="changes">{% for change in changes %}<li><code>{{ change.status }}</code> {{ change.path }}</li>{% endfor %}</ul>
-	<p class="hint">Publiceren vanuit het beheer komt in de volgende stap.</p>
+	<p><a class="button" href="/publiceren">Naar publiceren</a></p>
+	{% elif unpushed %}
+	<p>Er staan vastgelegde wijzigingen klaar die GitHub nog niet heeft bereikt. <a href="/publiceren">Publiceren</a></p>
 	{% else %}
 	<p>Alles is gepubliceerd.</p>
 	{% endif %}

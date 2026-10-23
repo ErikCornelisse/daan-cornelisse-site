@@ -1,12 +1,12 @@
 """The site manager web app: overview, editing works, pages and contact data,
-and the Astro preview."""
+the Astro preview, and publishing."""
 
 from pathlib import Path
 from urllib.parse import quote
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from ruamel.yaml.comments import CommentedMap
@@ -15,6 +15,7 @@ from starlette.datastructures import FormData, UploadFile
 from . import validation
 from .content import LANGS, PAGE_NAMES, Entry, SiteContent
 from .images import safe_stem, save_upload
+from .publish import Publisher, default_message, latest_deploy, pages_url
 from .settings import load_settings
 from .site_tools import Preview, last_commit, pending_changes
 
@@ -22,6 +23,7 @@ HERE = Path(__file__).resolve().parent
 settings = load_settings()
 content = SiteContent(settings.site_root)
 preview = Preview(settings.site_root, settings.preview_port, expose=not settings.is_local_only)
+publisher = Publisher(settings.site_root, author=settings.publish_author)
 
 app = FastAPI(title="Sitebeheer Daan Cornelisse", docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
@@ -85,6 +87,7 @@ def overview(request: Request, bericht: str = ""):
                 for name in PAGE_NAMES
             ],
             "changes": pending_changes(settings.site_root),
+            "unpushed": publisher.unpushed(),
             "last_commit": last_commit(settings.site_root),
             "preview_running": preview.status(),
             "preview_url": preview_url(request),
@@ -412,6 +415,59 @@ async def save_contact(request: Request):
         )
     content.write_site_data(data)
     return redirect("/contact", "Opgeslagen.")
+
+
+# Publishing ----------------------------------------------------------------
+
+
+def render_publish(request: Request, result=None, message: str = "", status_code: int = 200):
+    changes = pending_changes(settings.site_root)
+    repo = publisher.github_repo()
+    return templates.TemplateResponse(
+        request,
+        "publish.html",
+        {
+            "changes": changes,
+            "unpushed": publisher.unpushed(),
+            "default_message": default_message([c.path for c in changes]) if changes else "",
+            "result": result,
+            "message": message,
+            "errors": [],
+            "repo": repo,
+            "live_url": pages_url(repo) if repo else "",
+            "preview_running": preview.status(),
+            "preview_url": preview_url(request),
+        },
+        status_code=status_code,
+    )
+
+
+@app.get("/publiceren", response_class=HTMLResponse)
+def publish_page(request: Request, bericht: str = ""):
+    return render_publish(request, message=bericht)
+
+
+@app.post("/publiceren", response_class=HTMLResponse)
+async def publish(request: Request):
+    form = await request.form()
+    result = publisher.publish(str(form.get("message", "")))
+    return render_publish(request, result=result, status_code=200 if result.ok else 422)
+
+
+@app.post("/publiceren/terugdraaien")
+async def discard(request: Request):
+    form = await request.form()
+    try:
+        message = publisher.discard(str(form.get("path", "")))
+    except ValueError as error:
+        message = str(error)
+    return redirect("/publiceren", message)
+
+
+@app.get("/publiceren/status")
+def deploy_status():
+    repo = publisher.github_repo()
+    return JSONResponse(latest_deploy(repo) if repo else None)
 
 
 def run() -> None:

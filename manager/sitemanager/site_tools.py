@@ -21,7 +21,9 @@ def _run(args: list[str], cwd: Path, timeout: int = 60) -> subprocess.CompletedP
 
 
 def pending_changes(site_root: Path) -> list[Change]:
-    result = _run(["git", "status", "--porcelain", "--", *CONTENT_PATHS], site_root)
+    result = _run(
+        ["git", "status", "--porcelain", "--untracked-files=all", "--", *CONTENT_PATHS], site_root
+    )
     return [Change(line[:2].strip(), line[3:]) for line in result.stdout.splitlines() if line]
 
 

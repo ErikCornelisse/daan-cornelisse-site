@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Publiceren{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">Overzicht</a> › Publiceren</p>
+<h1>Publiceren</h1>
+
+{% if result %}
+<section class="card {{ 'card--ok' if result.ok else 'card--error' }}">
+	<h2>{{ "Gepubliceerd" if result.ok else "Publiceren is niet gelukt" }}</h2>
+	{% if result.ok %}
+	<p>De wijzigingen staan op GitHub{% if result.commit %} (versie <code>{{ result.commit }}</code>){% endif %}.
+		De site wordt nu bijgewerkt; dat duurt meestal een minuut. De voortgang staat hieronder.</p>
+	{% else %}
+	<p>Er is niets online gezet. Bekijk de stap die mislukte; je wijzigingen staan nog klaar.</p>
+	{% endif %}
+	<ol class="steps">
+		{% for step in result.steps %}
+		<li class="{{ 'ok' if step.ok else 'failed' }}">
+			<span>{{ "✓" if step.ok else "✗" }} {{ step.name }}</span>
+			{% if step.output and not step.ok %}<pre>{{ step.output }}</pre>{% endif %}
+		</li>
+		{% endfor %}
+	</ol>
+</section>
+{% endif %}
+
+<section class="card">
+	<h2>Klaar om te publiceren</h2>
+	{% if changes %}
+	<p>Deze wijzigingen gaan online:</p>
+	<ul class="change-list">
+		{% for change in changes %}
+		<li>
+			<span><code>{{ change.status }}</code> {{ change.path }}</span>
+			<form method="post" action="/publiceren/terugdraaien"
+				onsubmit="return confirm('De wijziging in {{ change.path }} ongedaan maken? Dit kan niet worden hersteld.')">
+				<input type="hidden" name="path" value="{{ change.path }}">
+				<button class="link">Ongedaan maken</button>
+			</form>
+		</li>
+		{% endfor %}
+	</ul>
+	{% elif unpushed %}
+	<p>Er {{ "staat" if unpushed == 1 else "staan" }} {{ unpushed }} vastgelegde
+		{{ "wijziging" if unpushed == 1 else "wijzigingen" }} klaar die GitHub nog niet heeft bereikt.</p>
+	{% else %}
+	<p>Er zijn geen wijzigingen. Alles is gepubliceerd.</p>
+	{% endif %}
+
+	{% if changes or unpushed %}
+	<form method="post" action="/publiceren" class="stack publish-form" data-busy="Bezig met controleren en publiceren…">
+		{% if changes %}
+		<label>Omschrijving <span class="hint">(optioneel)</span>
+			<input name="message" placeholder="{{ default_message }}">
+		</label>
+		{% endif %}
+		<p class="hint">Eerst wordt de site gecontroleerd en gebouwd. Pas als dat lukt, gaan de wijzigingen naar GitHub en
+			wordt de site bijgewerkt.
+			{% if preview_running %}Bekijk ze eerst in het <a href="{{ preview_url }}" target="_blank" rel="noopener">voorbeeld</a>.{% endif %}</p>
+		<div class="actions"><button>Controleren en publiceren</button></div>
+	</form>
+	{% endif %}
+</section>
+
+{% if repo %}
+<section class="card">
+	<h2>Laatste update van de site</h2>
+	<p id="deploy-status" data-repo="{{ repo }}">Status ophalen…</p>
+	<p class="hint">Live site: <a href="{{ live_url }}" target="_blank" rel="noopener">{{ live_url }}</a></p>
+</section>
+{% endif %}
+
+<script>
+	// Disable the button while publishing; it takes a little while.
+	for (const form of document.querySelectorAll('.publish-form')) {
+		form.addEventListener('submit', () => {
+			const button = form.querySelector('button');
+			button.disabled = true;
+			button.textContent = form.dataset.busy;
+		});
+	}
+
+	// Follow the GitHub Actions run until it has finished.
+	const target = document.getElementById('deploy-status');
+	const labels = {
+		queued: 'In de wachtrij',
+		in_progress: 'Bezig',
+		completed: 'Klaar',
+		success: 'gelukt',
+		failure: 'mislukt',
+		cancelled: 'geannuleerd',
+	};
+	async function refresh() {
+		try {
+			const run = await (await fetch('/publiceren/status')).json();
+			if (!run) {
+				target.textContent = 'Geen informatie beschikbaar.';
+				return;
+			}
+			const when = new Date(run.updated).toLocaleString('nl-NL');
+			const outcome = run.conclusion ? ` – ${labels[run.conclusion] ?? run.conclusion}` : '';
+			target.innerHTML = '';
+			const link = document.createElement('a');
+			link.href = run.url;
+			link.target = '_blank';
+			link.rel = 'noopener';
+			link.textContent = `${labels[run.status] ?? run.status}${outcome}`;
+			target.append(link, ` · versie ${run.sha} · ${when}`);
+			if (run.status !== 'completed') setTimeout(refresh, 5000);
+		} catch {
+			target.textContent = 'Status kon niet worden opgehaald.';
+		}
+	}
+	if (target) refresh();
+</script>
+{% endblock %}

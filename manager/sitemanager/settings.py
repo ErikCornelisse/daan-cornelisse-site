@@ -15,6 +15,7 @@ class Settings:
     host: str
     port: int
     preview_port: int
+    publish_author: str
 
     @property
     def is_local_only(self) -> bool:
@@ -33,4 +34,5 @@ def load_settings() -> Settings:
         host=os.getenv("MANAGER_HOST", "127.0.0.1"),
         port=int(os.getenv("MANAGER_PORT", "8765")),
         preview_port=int(os.getenv("PREVIEW_PORT", "4321")),
+        publish_author=os.getenv("PUBLISH_AUTHOR", "").strip(),
     )

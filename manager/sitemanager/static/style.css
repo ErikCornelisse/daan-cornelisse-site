@@ -303,3 +303,68 @@ th {
 	align-items: center;
 	gap: 1.25rem;
 }
+
+.card--ok {
+	border-left: 6px solid #3f7d3a;
+}
+
+.card--error {
+	border-left: 6px solid var(--error);
+}
+
+.steps {
+	margin: 0;
+	padding-left: 1.25rem;
+}
+
+.steps .ok {
+	color: #2f6a2b;
+}
+
+.steps .failed {
+	color: var(--error);
+}
+
+.steps pre,
+pre {
+	overflow-x: auto;
+	max-height: 18rem;
+	margin: 0.5rem 0 0;
+	padding: 0.75rem;
+	border-radius: var(--radius);
+	background: #f6f1e6;
+	color: var(--ink);
+	font-size: 0.8rem;
+	white-space: pre-wrap;
+}
+
+.change-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.change-list li {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.25rem 1rem;
+	padding: 0.4rem 0;
+	border-bottom: 1px solid #eee3cf;
+	overflow-wrap: anywhere;
+}
+
+button.link {
+	min-height: 2.75rem;
+	padding: 0;
+	background: none;
+	color: var(--accent);
+	font-weight: 400;
+	text-decoration: underline;
+}
+
+button:disabled {
+	opacity: 0.6;
+	cursor: progress;
+}

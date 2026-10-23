@@ -46,7 +46,7 @@ Background: the options and choice are in the advice of 2026-10-23
 |---|-------|----------|------------|--------|
 | 1 | Skeleton | `manager/` Python project, FastAPI app with layout and an overview of works, pages and git status | — | done |
 | 2 | Content editing and preview | Edit works (nl/en side by side), page texts and contact data; image upload; validation; start/stop the Astro preview | 1 | done |
-| 3 | Publish to GitHub Pages | Change list, check + build, commit and push, deploy status | 2 | todo |
+| 3 | Publish to GitHub Pages | Change list, check + build, commit and push, deploy status | 2 | done |
 | 4 | Translation | "Translate to English" per work/page via Ollama; draft/reviewed status; outdated-translation warnings | 2 | todo |
 | 5 | Style | Colours with contrast check, fonts, type and spacing sizes; preview | 2 | todo |
 | 6 | Service on the Mac mini | launchd agent, install and update instructions, Tailscale access notes | 3 | todo |
@@ -73,12 +73,21 @@ for progress.
 - [x] Validation mirroring `content.config.ts`, with messages in the form
 - [x] Start/stop the Astro dev server and link to the preview of the edited language
 
-## Phases 3–8
+## Phase 3 — Publish to GitHub Pages
+
+- [x] Publish screen: pending content changes with *undo* per file, optional description — _done when:_ undo restores a tracked file and removes a new one, and refuses code
+- [x] `npm run check` and `npm run build` before anything is committed — _done when:_ a failing check commits nothing
+- [x] Commit only the changed content files, `git pull --rebase --autostash`, push — _done when:_ code changes in the working copy stay out of the commit and remote changes are taken in
+- [x] Retry: commits that did not reach GitHub are pushed on the next publish
+- [x] Deploy status of the latest GitHub Actions run, refreshed until finished (public API, no login)
+- [x] Optional commit author (`PUBLISH_AUTHOR`)
+
+## Phases 4–8
 Detailed when the previous phase is done.
 
 ## Open questions
-1. Commit author for changes made in the manager: a fixed "Daan Cornelisse
-   (site manager)", or the git identity of the Mac?
+1. ~~Commit author.~~ Configurable with `PUBLISH_AUTHOR`; empty uses the
+   Mac's git identity.
 2. Translation quality and speed of `qwen3.6:35b-mlx` on the Mac mini: to be
    measured in phase 4; which model is installed there?
 3. SFTP host, user and target folder at mijndomein (phase 7).
