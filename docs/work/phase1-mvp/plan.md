@@ -37,7 +37,7 @@ Background, decisions and options: [phase 1 proposal](../analysis/phase1-static-
 ## Phases
 | # | Phase | Delivers | Depends on | Status |
 |---|-------|----------|------------|--------|
-| 1 | [Repository and scaffold](phase-01-scaffold.md) | Astro project, GitHub repo, Pages deploy of a placeholder page | — | todo |
+| 1 | [Repository and scaffold](phase-01-scaffold.md) | Astro project, GitHub repo, Pages deploy of a placeholder page | — | done (intent.md still open) |
 | 2 | [Tokens, fonts and bands](phase-02-tokens.md) | Design tokens, self-hosted fonts, cream/paper bands, mobile-first base | 1 | todo |
 | 3 | [i18n skeleton](phase-03-i18n.md) | `/nl/` and `/en/`, root language chooser, switch, hreflang | 2 | todo |
 | 4 | [Hero and header](phase-04-hero.md) | Art-directed hero, header nav, *Mijn verhaal* scroll link | 3 | todo |
@@ -50,8 +50,7 @@ Status: `todo` → `in-progress` → `done`. This table is the source of truth
 for progress.
 
 ## Open questions
-1. Repository name and visibility. Proposed: `daan-cornelisse-site`, public
-   (free GitHub Pages needs a public repo on a free account). Needed for phase 1.
+1. ~~Repository name and visibility.~~ Resolved: `ErikCornelisse/daan-cornelisse-site`, public, Pages at <https://erikcornelisse.github.io/daan-cornelisse-site/>.
 2. Form service (Web3Forms or Formspree) and the address that receives the
    messages. Needed for phase 6; the form can ship disabled until then.
 3. Who writes the English texts: Daan, or Claude drafts and Daan checks.
