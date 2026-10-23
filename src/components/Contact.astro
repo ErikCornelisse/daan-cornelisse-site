@@ -85,6 +85,13 @@ const { Content } = await render(page);
 		stroke: var(--color-brush);
 	}
 
+	/* Solid backing inside the stroke: keeps the label readable if the SVG
+	   does not render, and lets contrast checkers see the real background */
+	.brush-button__label {
+		background: var(--color-brush);
+		padding-inline: 0.15em;
+	}
+
 	.brush-button:hover .brush-button__label {
 		text-decoration: underline;
 		text-underline-offset: 0.2em;

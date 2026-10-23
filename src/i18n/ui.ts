@@ -39,6 +39,10 @@ const nl = {
 	'form.notConnected': 'Dit formulier is nog niet gekoppeld en verstuurt niets. Mail Daan voorlopig rechtstreeks.',
 	'form.privacy': 'Je bericht gaat via de dienst Web3Forms naar Daan en wordt alleen gebruikt om je te antwoorden.',
 	'form.subject': 'Nieuw bericht via de website',
+	'footer.label': 'Voettekst',
+	'footer.privacy': 'Privacyverklaring',
+	'privacy.title': 'Privacyverklaring',
+	'privacy.description': 'Hoe de website van Daan Cornelisse met je gegevens omgaat.',
 } as const;
 
 const en: Record<keyof typeof nl, string> = {
@@ -67,6 +71,10 @@ const en: Record<keyof typeof nl, string> = {
 	'form.notConnected': 'This form is not connected yet and sends nothing. For now, please e-mail Daan directly.',
 	'form.privacy': 'Your message reaches Daan through the Web3Forms service and is only used to reply to you.',
 	'form.subject': 'New message from the website',
+	'footer.label': 'Footer',
+	'footer.privacy': 'Privacy statement',
+	'privacy.title': 'Privacy statement',
+	'privacy.description': 'How the website of Daan Cornelisse handles your data.',
 };
 
 export const ui: Record<Lang, Record<keyof typeof nl, string>> = { nl, en };

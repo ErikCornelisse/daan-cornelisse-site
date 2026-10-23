@@ -1,10 +1,14 @@
 ---
-import '@fontsource/belleza/400.css';
-import '@fontsource/source-serif-4/400.css';
-import '@fontsource/source-serif-4/400-italic.css';
-import '@fontsource/source-serif-4/700.css';
+// Latin subsets only: covers Dutch and English, keeps the CSS small.
+import '@fontsource/belleza/latin-400.css';
+import '@fontsource/source-serif-4/latin-400.css';
+import '@fontsource/source-serif-4/latin-400-italic.css';
+import '@fontsource/source-serif-4/latin-700.css';
+import headingFont from '@fontsource/belleza/files/belleza-latin-400-normal.woff2?url';
+import bodyFont from '@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff2?url';
 import '../styles/tokens.css';
 import '../styles/global.css';
+import Footer from '../components/Footer.astro';
 import { languages, type Lang } from '../i18n/ui';
 import { absoluteLocaleUrl } from '../i18n/utils';
 
@@ -13,7 +17,7 @@ interface Props {
 	lang: Lang;
 	description?: string;
 	/** Path without language prefix. When set, the page exists in every
-	    language and gets hreflang alternates and a canonical URL. */
+	    language and gets hreflang alternates, a canonical URL and a footer. */
 	path?: string;
 }
 
@@ -23,10 +27,11 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 // Daan's own domain (BASE=/) is indexed.
 const noindex = base !== '/';
 const rootUrl = new URL(base, Astro.site).href;
-const alternates =
-	path === undefined
-		? []
-		: (Object.keys(languages) as Lang[]).map((l) => ({ lang: l, href: absoluteLocaleUrl(l, path) }));
+const langs = Object.keys(languages) as Lang[];
+const alternates = path === undefined ? [] : langs.map((l) => ({ lang: l, href: absoluteLocaleUrl(l, path) }));
+const canonical = path === undefined ? rootUrl : absoluteLocaleUrl(lang, path);
+const ogLocale = { nl: 'nl_NL', en: 'en_GB' } as const;
+const ogImage = new URL(`${base}og-image.jpg`, Astro.site).href;
 ---
 
 <html lang={lang}>
@@ -37,14 +42,33 @@ const alternates =
 		<title>{title}</title>
 		{description && <meta name="description" content={description} />}
 		{noindex && <meta name="robots" content="noindex" />}
-		{path !== undefined && <link rel="canonical" href={absoluteLocaleUrl(lang, path)} />}
+		<link rel="canonical" href={canonical} />
 		{alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
 		{alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={rootUrl} />}
+
+		<link rel="preload" href={headingFont} as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+
 		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
-		<link rel="icon" href={`${base}favicon.ico`} />
-		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" href={`${base}favicon.ico`} sizes="32x32" />
+		<link rel="apple-touch-icon" href={`${base}apple-touch-icon.png`} />
+		<link rel="sitemap" href={`${base}sitemap-index.xml`} />
+		<meta name="theme-color" content="#1a1a14" />
+
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Daan Cornelisse" />
+		<meta property="og:title" content={title} />
+		{description && <meta property="og:description" content={description} />}
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:locale" content={ogLocale[lang]} />
+		{langs.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
+		<meta name="twitter:card" content="summary_large_image" />
 	</head>
 	<body>
 		<slot />
+		{path !== undefined && <Footer lang={lang} />}
 	</body>
 </html>

@@ -1,0 +1,51 @@
+---
+// Privacy statement in both languages, from src/content/pages/<lang>/privacy.md.
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Section from '../../components/Section.astro';
+import { languages, type Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+export function getStaticPaths() {
+	return (Object.keys(languages) as Lang[]).map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const page = await getEntry('pages', `${lang}/privacy`);
+if (!page) throw new Error(`Missing src/content/pages/${lang}/privacy.md`);
+const { Content } = await render(page);
+---
+
+<BaseLayout
+	title={`${t('privacy.title')} · ${t('site.title')}`}
+	lang={lang}
+	description={t('privacy.description')}
+	path="privacy/"
+>
+	<Header lang={lang} />
+	<main>
+		<Section>
+			<article class="prose flow">
+				<h1>{page.data.title}</h1>
+				<Content />
+			</article>
+		</Section>
+	</main>
+</BaseLayout>
+
+<style>
+	.prose {
+		max-width: var(--measure);
+	}
+
+	.prose :global(h2) {
+		--flow-space: var(--space-l);
+		font-size: var(--step-2);
+	}
+
+	h1 {
+		font-size: var(--step-3);
+	}
+</style>

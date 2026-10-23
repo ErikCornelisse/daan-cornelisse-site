@@ -1,0 +1,48 @@
+---
+// Site footer: name, year and the privacy statement.
+import type { Lang } from '../i18n/ui';
+import { localeUrl, useTranslations } from '../i18n/utils';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" aria-label={t('footer.label')}>
+	<div class="container site-footer__inner">
+		<p>© {year} Daan Cornelisse</p>
+		<a href={localeUrl(lang, 'privacy/')}>{t('footer.privacy')}</a>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		padding-block: var(--space-m);
+		background: #1a1a14;
+		color: var(--color-on-photo);
+		font-family: var(--font-heading);
+		font-size: var(--step--1);
+	}
+
+	.site-footer__inner {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-xs) var(--space-m);
+	}
+
+	a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target);
+	}
+
+	a:focus-visible {
+		outline-color: var(--color-on-photo);
+	}
+</style>
