@@ -1,0 +1,57 @@
+/*
+ * Design tokens. Every colour, font and size used in components comes from
+ * here, so refining the style or swapping a font means editing this file.
+ *
+ * Colours are sampled from docs/work/design/mockup v1.png.
+ * Breakpoints (media queries cannot read custom properties):
+ *   48rem  (768 px)  tablet / small laptop
+ *   64rem (1024 px)  laptop
+ */
+
+:root {
+	/* Backgrounds */
+	--color-cream: #ffdda3;
+	--color-paper: #b9a47a;
+
+	/* Text */
+	--color-ink: #111111;
+	--color-on-photo: #ffdda3;
+
+	/* Accent colours for work titles */
+	--color-accent-purple: #6e5f85;
+	--color-accent-orange: #d68641;
+	--color-accent-white: #ffffff;
+
+	/* Brush button */
+	--color-brush: #000000;
+	--color-brush-text: #d68641;
+
+	/* Fonts: free Optima look-alike for headings, serif for body text */
+	--font-heading: 'Belleza', Optima, Candara, 'Segoe UI', sans-serif;
+	--font-body: 'Source Serif 4', 'Times New Roman', Times, serif;
+
+	/* Fluid type scale: 375 px → 1440 px viewport */
+	--step--1: clamp(0.875rem, 0.84rem + 0.15vw, 0.95rem);
+	--step-0: clamp(1.0625rem, 1.02rem + 0.19vw, 1.1875rem);
+	--step-1: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
+	--step-2: clamp(1.5rem, 1.31rem + 0.85vw, 2.1rem);
+	--step-3: clamp(1.85rem, 1.5rem + 1.5vw, 2.9rem);
+	--step-4: clamp(2.2rem, 1.65rem + 2.4vw, 3.9rem);
+
+	--leading-body: 1.5;
+	--leading-heading: 1.15;
+
+	/* Spacing scale */
+	--space-2xs: 0.25rem;
+	--space-xs: 0.5rem;
+	--space-s: 1rem;
+	--space-m: 1.5rem;
+	--space-l: clamp(2rem, 1.6rem + 1.8vw, 3rem);
+	--space-xl: clamp(3rem, 2.3rem + 3vw, 5rem);
+
+	/* Layout */
+	--container: 68rem;
+	--gutter: clamp(1rem, 0.6rem + 2.5vw, 2.5rem);
+	--measure: 38rem;
+	--touch-target: 2.75rem;
+}

@@ -1,0 +1,107 @@
+/* Reset, base typography and layout helpers. Written for phones first;
+   wider layouts are added with min-width queries. */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+body {
+	min-height: 100vh;
+	background: var(--color-cream);
+	color: var(--color-ink);
+	font-family: var(--font-body);
+	font-size: var(--step-0);
+	line-height: var(--leading-body);
+	-webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg,
+video {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-heading);
+	font-weight: 400;
+	line-height: var(--leading-heading);
+	text-wrap: balance;
+}
+
+h1 {
+	font-size: var(--step-4);
+}
+
+h2 {
+	font-size: var(--step-3);
+}
+
+h3 {
+	font-size: var(--step-2);
+}
+
+p {
+	text-wrap: pretty;
+}
+
+a {
+	color: inherit;
+	text-underline-offset: 0.15em;
+}
+
+:focus-visible {
+	outline: 3px solid var(--color-ink);
+	outline-offset: 3px;
+}
+
+/* Layout helpers */
+
+.container {
+	width: min(100% - 2 * var(--gutter), var(--container));
+	margin-inline: auto;
+}
+
+/* Vertical rhythm for a run of content */
+.flow > * + * {
+	margin-top: var(--flow-space, 1em);
+}
+
+/* Body text in one column on phones, two from 48rem */
+.text-columns {
+	max-width: var(--measure);
+}
+
+@media (min-width: 48rem) {
+	.text-columns {
+		max-width: none;
+		columns: 2;
+		column-gap: var(--space-l);
+	}
+
+	.text-columns > * {
+		break-inside: avoid;
+	}
+}

@@ -1,0 +1,36 @@
+---
+import '@fontsource/belleza/400.css';
+import '@fontsource/source-serif-4/400.css';
+import '@fontsource/source-serif-4/400-italic.css';
+import '@fontsource/source-serif-4/700.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	lang?: 'nl' | 'en';
+	description?: string;
+}
+
+const { title, lang = 'nl', description } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+// The GitHub Pages prototype stays out of search engines; the build for
+// Daan's own domain (BASE=/) is indexed.
+const noindex = base !== '/';
+---
+
+<html lang={lang}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		{description && <meta name="description" content={description} />}
+		{noindex && <meta name="robots" content="noindex" />}
+		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+		<link rel="icon" href={`${base}favicon.ico`} />
+		<meta name="generator" content={Astro.generator} />
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
