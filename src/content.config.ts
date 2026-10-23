@@ -23,11 +23,18 @@ const sections = defineCollection({
 			subtitle: z.string().optional(),
 			cta: z.string().optional(),
 			portrait: image().optional(),
-			// The section's own image (the hero's photo, or an image beside the text)
+			// Focal point of the hero photo as "x% y%", kept in view when it is cropped.
+			focus: z
+				.string()
+				.regex(/^\d{1,3}% \d{1,3}%$/, 'Use "x% y%", for example "50% 35%"')
+				.optional(),
+			// The section's own image (the hero's photo, or an image beside the text);
+			// position is the side of the text it is on, from 48rem.
 			image: z
 				.object({
 					src: image(),
 					alt: z.string().min(1, 'Every image needs an alt text'),
+					position: z.enum(['left', 'right']).optional(),
 				})
 				.optional(),
 		}),

@@ -32,7 +32,7 @@ text falls back to the Dutch one.
 |---|-------|----------|------------|--------|
 | 1 | Content-driven page | `page.json`, `sections` and `topics` collections, rules checked at build time, page/menu/bands rendered from them; manager reads the new layout | — | done |
 | 2 | Page layout in the manager | Pagina-indeling: reorder, add, remove sections, menu toggle; reorder and move topics | 1 | done |
-| 3 | Section editors | Editors for section (own text, image, subheadings), hero (photo upload, focal point, link target) and contact | 2 | todo |
+| 3 | Section editors | Editors for section (own text, image, subheadings), hero (photo upload, focal point, link target) and contact | 2 | done |
 | 4 | Bands from the structure | Stijl contrast check reads bands from `page.json`; optional band override per section | 2 | todo |
 
 Status: `todo` → `in-progress` → `done`. This table is the source of truth
@@ -73,8 +73,21 @@ the manager adds a new work at the end of the first section with works.
 section and moving *Over mij* up showed directly in the preview with the
 bands still alternating; both changes were undone from the screen.
 
-## Phases 3–4
-Detailed when the previous phase is done.
+## Phase 3 — Section editors
+
+- [x] Site: optional `focus` ("x% y%") for the hero photo, used where it is cropped (on phones only without a portrait crop); optional `image.position` (`left` / `right`) for a section's own image — _done when:_ the built site is unchanged while they are not set
+- [x] Section editor: heading, anchor and menu label per language, own text with `###` subheadings, image upload / replace / remove with a description per language and its side, and the list of the section's topics
+- [x] Hero editor: title, subtitle and link text per language, link target, wide photo upload with click-to-set focal point and a phone preview, optional portrait crop
+- [x] Contact editor: heading, anchor, menu label and intro text per language
+- [x] Checks: required texts, unique and valid anchors per language, a description for every image, a photo for the hero, a valid focal point; an English text left empty creates no English file (the site falls back to Dutch)
+
+**Result (2026-10-23):** 72 manager tests pass; saving an unchanged hero,
+section or contact leaves its files identical. In the browser, a focal
+point set by clicking and the portrait moved to the right showed in the
+preview and built; both test edits were undone.
+
+## Phase 4
+Detailed when phase 3 is done.
 
 ## Open questions
 None yet.

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}{{ label }}{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">Overzicht</a> › <a href="/indeling">Pagina-indeling</a> › {{ label }}</p>
+<div class="page-head">
+	<h1>{{ label }}</h1>
+	<a href="{{ preview_url }}" target="_blank" rel="noopener">Bekijk in voorbeeld</a>
+</div>
+<p class="hint">
+	{% if ref.type == 'hero' %}Het openingsbeeld staat altijd bovenaan de pagina.
+	{% elif ref.type == 'contact' %}De contactsectie staat altijd onderaan. E-mailadres, links en formulier stel je in bij
+		<a href="/contact">Contact &amp; links</a>.
+	{% else %}Een sectie heeft een kop, eventueel een eigen tekst met afbeelding, en de onderwerpen die je in de
+		<a href="/indeling">pagina-indeling</a> aan de sectie toevoegt.{% endif %}
+</p>
+
+<form method="post" enctype="multipart/form-data" class="stack" id="section-form">
+	{% if has_image %}
+	<section class="card">
+		<h2>{{ "Foto" if ref.type == 'hero' else "Afbeelding bij de tekst" }}</h2>
+		{% if ref.type == 'hero' %}
+		<p class="hint">Een brede foto. Klik op het belangrijkste deel van de foto (bijvoorbeeld het gezicht) om het
+			<strong>brandpunt</strong> te kiezen: dat blijft in beeld als de foto op een telefoon of laptop wordt bijgesneden.</p>
+		{% if image_url %}
+		<div class="focus-picker">
+			<div class="focus-picker__image" id="focus-image">
+				<img src="{{ image_url }}" alt="">
+				<span class="focus-picker__marker" id="focus-marker" hidden></span>
+			</div>
+			<div class="focus-picker__phone" aria-hidden="true">
+				<img src="{{ portrait_url or image_url }}" alt="" id="phone-crop">
+				<span class="hint">Telefoon</span>
+			</div>
+		</div>
+		{% endif %}
+		<label>Brandpunt <span class="hint">(leeg = midden)</span>
+			<input name="focus" id="focus" value="{{ form.focus }}" placeholder="50% 35%" pattern="\d{1,3}% \d{1,3}%">
+		</label>
+		{% elif image_url %}
+		<img class="section-image" src="{{ image_url }}" alt="">
+		{% endif %}
+		<input type="hidden" name="image_src" value="{{ form.image }}">
+		<label>{{ "Foto vervangen" if form.image else "Foto kiezen" }}
+			<input name="image_file" type="file" accept="image/jpeg,image/png,image/webp">
+		</label>
+		{% if form.image and ref.type != 'hero' %}
+		<label class="check"><input type="checkbox" name="image_remove" value="1"> Afbeelding weghalen</label>
+		<fieldset class="choice">
+			<legend>Plaats op grote schermen</legend>
+			<label class="check"><input type="radio" name="position" value="left" {% if form.position != 'right' %}checked{% endif %}> Links van de tekst</label>
+			<label class="check"><input type="radio" name="position" value="right" {% if form.position == 'right' %}checked{% endif %}> Rechts van de tekst</label>
+		</fieldset>
+		{% endif %}
+
+		{% if ref.type == 'hero' %}
+		<h3>Aparte foto voor telefoons <span class="hint">(optioneel)</span></h3>
+		<p class="hint">Een staande uitsnede. Zonder deze foto krijgen telefoons de brede foto, rond het brandpunt.</p>
+		{% if portrait_url %}<img class="section-image section-image--portrait" src="{{ portrait_url }}" alt="">{% endif %}
+		<label>{{ "Vervangen" if form.portrait else "Foto kiezen" }}
+			<input name="portrait_file" type="file" accept="image/jpeg,image/png,image/webp">
+		</label>
+		{% if form.portrait %}<label class="check"><input type="checkbox" name="portrait_remove" value="1"> Telefoonfoto weghalen</label>{% endif %}
+		{% endif %}
+	</section>
+	{% endif %}
+
+	{% if ref.type == 'hero' %}
+	<section class="card">
+		<h2>Link</h2>
+		<label>De linktekst in het openingsbeeld gaat naar
+			<select name="link">
+				<option value="">geen link</option>
+				{% for target_id, target_label in link_targets %}
+				<option value="{{ target_id }}" {% if target_id == form.link %}selected{% endif %}>{{ target_label }}</option>
+				{% endfor %}
+			</select>
+		</label>
+	</section>
+	{% endif %}
+
+	<div class="languages">
+		{% for lang in langs %}
+		{% set text = form.texts[lang] %}
+		<section class="card" lang="{{ lang }}">
+			<h2>{{ lang_names[lang] }}</h2>
+			{% if lang == 'en' and not text.title %}<p class="hint">Zolang dit leeg is, toont de Engelse pagina de Nederlandse tekst.</p>{% endif %}
+			{% for key, field_label, required in fields %}
+			<label>{{ field_label }}{% if not required %} <span class="hint">(optioneel)</span>{% endif %}
+				<input name="{{ lang }}_{{ key }}" value="{{ text[key] }}"
+					{% if key == 'anchor' %}pattern="[a-z0-9\-]+" title="kleine letters, cijfers en -"{% endif %}>
+			</label>
+			{% if key == 'anchor' %}<p class="hint">Het deel na # in het adres, bijvoorbeeld #{{ text[key] or 'over-mij' }}. Wijzig dit liever niet als er al naar gelinkt wordt.</p>{% endif %}
+			{% endfor %}
+			{% if has_image %}
+			<label>Beschrijving van de {{ "foto" if ref.type == 'hero' else "afbeelding" }}
+				<input name="{{ lang }}_alt" value="{{ text.alt }}">
+			</label>
+			{% endif %}
+			{% if has_body %}
+			<label>Tekst
+				<textarea name="{{ lang }}_body" rows="14">{{ text.body }}</textarea>
+			</label>
+			<p class="hint">Een lege regel begint een nieuwe alinea. Een regel die begint met <code>###</code> wordt een tussenkop;
+				alles blijft in dezelfde achtergrondkleur.</p>
+			{% endif %}
+		</section>
+		{% endfor %}
+	</div>
+
+	{% if ref.type == 'section' %}
+	<section class="card">
+		<h2>Onderwerpen in deze sectie</h2>
+		{% if topics %}
+		<ol>{% for topic_id, title in topics %}<li><a href="/werken/{{ topic_id }}">{{ title }}</a></li>{% endfor %}</ol>
+		{% else %}<p>Nog geen onderwerpen.</p>{% endif %}
+		<p class="hint">Volgorde, toevoegen en verplaatsen: in de <a href="/indeling">pagina-indeling</a>.</p>
+	</section>
+	{% endif %}
+
+	<div class="actions">
+		<button>Opslaan</button>
+		<a href="/indeling">Annuleren</a>
+	</div>
+</form>
+
+<script>
+	// Focal point: click the photo to choose the part that must stay in view.
+	const picker = document.getElementById('focus-image');
+	if (picker) {
+		const input = document.getElementById('focus');
+		const marker = document.getElementById('focus-marker');
+		const phone = document.getElementById('phone-crop');
+		const hasPortrait = {{ 'true' if portrait_url else 'false' }};
+		function show() {
+			const match = /^(\d{1,3})% (\d{1,3})%$/.exec(input.value.trim());
+			const [x, y] = match ? [match[1], match[2]] : [50, 50];
+			marker.hidden = !match;
+			marker.style.left = `${x}%`;
+			marker.style.top = `${y}%`;
+			if (!hasPortrait) phone.style.objectPosition = `${x}% ${y}%`;
+		}
+		picker.addEventListener('click', (event) => {
+			const box = picker.getBoundingClientRect();
+			const x = Math.round(((event.clientX - box.left) / box.width) * 100);
+			const y = Math.round(((event.clientY - box.top) / box.height) * 100);
+			input.value = `${x}% ${y}%`;
+			show();
+		});
+		input.addEventListener('input', show);
+		show();
+	}
+</script>
+{% endblock %}

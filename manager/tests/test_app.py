@@ -129,22 +129,16 @@ def test_uploaded_image_is_scaled_down_and_linked_in_both_languages(app):
         assert f"alt: {alt}" in text
 
 
-@pytest.mark.parametrize("name", ["hero", "mediums", "over-mij", "contact", "privacy"])
-def test_saving_an_unchanged_section_keeps_the_files_identical(app, name):
+def test_saving_the_unchanged_privacy_page_keeps_the_files_identical(app):
     main, client, site = app
-    definition = main.page_definition(name)
-    folder = "pages" if definition["collection"] == "pages" else "sections"
-    files = [site / f"src/content/{folder}/{lang}/{name}.md" for lang in main.LANGS]
+    files = [site / f"src/content/pages/{lang}/privacy.md" for lang in main.LANGS]
     before = [f.read_text() for f in files]
-    page = client.get(f"/paginas/{name}")
-    assert page.status_code == 200
     data = {}
     for lang in main.LANGS:
-        entry = main.content.get(definition["collection"], lang, name)
-        for key, _ in definition["fields"]:
-            data[f"{lang}_{key}"] = main.get_field(entry.data, key)
+        entry = main.content.get("pages", lang, "privacy")
+        data[f"{lang}_title"] = entry.data["title"]
         data[f"{lang}_body"] = entry.body.strip("\n")
-    response = client.post(f"/paginas/{name}", data=data, follow_redirects=False)
+    response = client.post("/paginas/privacy", data=data, follow_redirects=False)
     assert response.status_code == 303
     assert [f.read_text() for f in files] == before
 

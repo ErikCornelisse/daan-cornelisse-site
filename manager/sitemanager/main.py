@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from ruamel.yaml.comments import CommentedMap
 from starlette.datastructures import FormData, UploadFile
 
-from . import layout, style, validation
+from . import layout, section_forms, style, validation
 from .content import LANGS, PAGE_NAMES, Entry, SiteContent
 from .images import safe_stem, save_upload
 from .publish import Publisher, default_message, latest_deploy, pages_url
@@ -35,70 +35,34 @@ LANG_NAMES = {"nl": "Nederlands", "en": "English"}
 templates.env.globals["lang_names"] = LANG_NAMES
 
 
-# Editable texts per kind of entry, as (front matter key, label); a dotted key
-# is a nested field ("image.alt"). The full section editors follow in step 3
-# of the sections plan; until then these screens edit the texts only.
-def page_definition(name: str) -> dict | None:
-    """What the Pagina's screen edits for a section id or a standalone page."""
-    if name in PAGE_NAMES:
-        return {
-            "collection": "pages",
-            "label": "Privacyverklaring",
-            "type": "page",
-            "fields": [("title", "Titel")],
-            "body": True,
-        }
-    section = next((s for s in content.sections() if s["id"] == name), None)
-    if section is None:
-        return None
-    entry = content.get("sections", "nl", name)
-    title = str(entry.data.get("title", name)) if entry else name
-    if section["type"] == "hero":
-        return {
-            "collection": "sections",
-            "label": "Openingsbeeld",
-            "type": "hero",
-            "body": False,
-            "fields": [
-                ("title", "Titel"),
-                ("subtitle", "Ondertitel"),
-                ("cta", "Linktekst"),
-                ("image.alt", "Beschrijving van de foto"),
-            ],
-        }
-    fields = [("title", "Kop")]
-    if entry and entry.data.get("image"):
-        fields.append(("image.alt", "Beschrijving van de afbeelding"))
-    label = "Contact" if section["type"] == "contact" else title
-    return {
-        "collection": "sections",
-        "label": label,
-        "type": section["type"],
-        "fields": fields,
-        "body": True,
-    }
+# Pages of their own (the privacy statement): title and text per language.
+PAGE_LABELS = {"privacy": "Privacyverklaring"}
 
 
-def page_names() -> list[str]:
-    return [s["id"] for s in content.sections()] + list(PAGE_NAMES)
+def section_label(ref: dict) -> str:
+    if ref["type"] == "hero":
+        return "Openingsbeeld"
+    if ref["type"] == "contact":
+        return "Contact"
+    entry = content.get("sections", "nl", ref["id"]) or content.get("sections", "en", ref["id"])
+    return str(entry.data.get("title", ref["id"])) if entry else ref["id"]
 
 
-def get_field(data: dict, key: str) -> str:
-    for part in key.split("."):
-        data = data.get(part) if isinstance(data, dict) else None
-    return "" if data is None else str(data)
-
-
-def set_field(data: dict, key: str, value: str) -> None:
-    *parents, last = key.split(".")
-    for part in parents:
-        data = data.setdefault(part, CommentedMap())
-    if value:
-        data[last] = value
-    elif not parents:
-        data.pop(last, None)
-    else:
-        data[last] = value  # nested values such as an alt text stay, so validation can flag them
+def page_rows() -> list[tuple[str, str, dict]]:
+    """(name, label, {lang: entry}) for every section and page, for the overview."""
+    rows = [
+        (
+            ref["id"],
+            section_label(ref),
+            {lang: content.get("sections", lang, ref["id"]) for lang in LANGS},
+        )
+        for ref in content.sections()
+    ]
+    rows += [
+        (name, PAGE_LABELS[name], {lang: content.get("pages", lang, name) for lang in LANGS})
+        for name in PAGE_NAMES
+    ]
+    return rows
 
 
 def redirect(url: str, message: str) -> RedirectResponse:
@@ -125,17 +89,7 @@ def overview(request: Request, bericht: str = ""):
         {
             "message": bericht,
             "works": content.topics(),
-            "pages": [
-                (
-                    name,
-                    page_definition(name)["label"],
-                    {
-                        lang: content.get(page_definition(name)["collection"], lang, name)
-                        for lang in LANGS
-                    },
-                )
-                for name in page_names()
-            ],
+            "pages": page_rows(),
             "changes": pending_changes(settings.site_root),
             "unpushed": publisher.unpushed(),
             "last_commit": last_commit(settings.site_root),
@@ -358,27 +312,102 @@ async def save_work(request: Request, slug: str | None):
     return redirect(f"/werken/{slug}", "Opgeslagen.")
 
 
-# Pages ---------------------------------------------------------------------
+# Sections and pages --------------------------------------------------------
+
+
+def section_ref(name: str) -> dict | None:
+    return next((s for s in content.sections() if s["id"] == name), None)
+
+
+def section_image_url(section_id: str, src: str) -> str:
+    if not src:
+        return ""
+    path = content.resolve_image(content.path_for("sections", "nl", section_id), src)
+    return image_url(path) if path.is_file() else ""
+
+
+def render_section(request: Request, ref: dict, values, errors: list[str], message: str = ""):
+    nl = content.get("sections", "nl", ref["id"])
+    anchor = f"#{nl.data.get('anchor', '')}" if nl and ref["type"] != "hero" else ""
+    return templates.TemplateResponse(
+        request,
+        "section.html",
+        {
+            "ref": ref,
+            "label": section_label(ref),
+            "form": values,
+            "fields": section_forms.TEXT_FIELDS[ref["type"]],
+            "has_body": section_forms.HAS_BODY[ref["type"]],
+            "has_image": section_forms.HAS_IMAGE[ref["type"]],
+            "image_url": section_image_url(ref["id"], values.image),
+            "portrait_url": section_image_url(ref["id"], values.portrait),
+            "link_targets": [
+                (s["id"], section_label(s)) for s in content.sections() if s["type"] != "hero"
+            ],
+            "topics": [
+                (
+                    t,
+                    str(
+                        (content.get("topics", "nl", t) or content.get("topics", "en", t)).data.get(
+                            "title", t
+                        )
+                    ),
+                )
+                for t in ref.get("topics", [])
+                if content.get("topics", "nl", t) or content.get("topics", "en", t)
+            ],
+            "errors": errors,
+            "message": message,
+            "preview_url": preview_url(request, "nl", anchor),
+        },
+        status_code=422 if errors else 200,
+    )
+
+
+async def save_section(request: Request, ref: dict):
+    form = await request.form()
+    uploads, errors = {}, []
+    entry_path = content.path_for("sections", "nl", ref["id"])
+    for name in ("image", "portrait"):
+        upload = form.get(f"{name}_file")
+        if isinstance(upload, UploadFile) and upload.filename:
+            try:
+                saved = save_upload(
+                    await upload.read(), upload.filename, section_forms.image_folder(content)
+                )
+                uploads[name] = content.relative_image_src(entry_path, saved)
+            except ValueError as error:
+                errors.append(f"{upload.filename}: {error}")
+    values = section_forms.from_form(content, ref, form, uploads)
+    errors += section_forms.check(content, content.sections(), values)
+    structure = content.read_structure()
+    if ref["type"] == "hero" and values.link != ref.get("link", ""):
+        try:
+            layout.set_hero_link(structure, values.link)
+        except layout.LayoutError as error:
+            errors.append(str(error))
+    if errors:
+        return render_section(request, ref, values, errors)
+    for entry in section_forms.apply(content, values):
+        content.save(entry)
+    if ref["type"] == "hero" and values.link != ref.get("link", ""):
+        content.write_structure(structure)
+    return redirect(f"/paginas/{ref['id']}", "Opgeslagen.")
 
 
 def render_page(request: Request, name: str, values: dict, errors: list[str], message: str = ""):
-    definition = page_definition(name)
-    anchor = ""
-    if definition["collection"] == "sections" and definition["type"] != "hero":
-        entry = content.get("sections", "nl", name)
-        anchor = f"#{entry.data.get('anchor', '')}" if entry else ""
     return templates.TemplateResponse(
         request,
         "page.html",
         {
             "name": name,
-            "label": definition["label"],
-            "fields": definition["fields"],
-            "has_body": definition["body"],
+            "label": PAGE_LABELS[name],
+            "fields": [("title", "Titel")],
+            "has_body": True,
             "values": values,
             "errors": errors,
             "message": message,
-            "preview_url": preview_url(request, "nl", "privacy/" if name == "privacy" else anchor),
+            "preview_url": preview_url(request, "nl", f"{name}/"),
         },
         status_code=422 if errors else 200,
     )
@@ -386,38 +415,36 @@ def render_page(request: Request, name: str, values: dict, errors: list[str], me
 
 @app.get("/paginas/{name}", response_class=HTMLResponse)
 def edit_page(request: Request, name: str, bericht: str = ""):
-    definition = page_definition(name)
-    if definition is None:
+    ref = section_ref(name)
+    if ref:
+        return render_section(request, ref, section_forms.load(content, ref), [], bericht)
+    if name not in PAGE_NAMES:
         raise HTTPException(404)
     values = {}
     for lang in LANGS:
-        entry = content.get(definition["collection"], lang, name)
-        values[lang] = (
-            {key: get_field(entry.data, key) for key, _ in definition["fields"]} if entry else {}
-        )
+        entry = content.get("pages", lang, name)
+        values[lang] = {"title": str(entry.data.get("title", "")) if entry else ""}
         values[lang]["body"] = entry.body.strip("\n") if entry else ""
     return render_page(request, name, values, [], bericht)
 
 
 @app.post("/paginas/{name}", response_class=HTMLResponse)
 async def save_page(request: Request, name: str):
-    definition = page_definition(name)
-    if definition is None:
+    ref = section_ref(name)
+    if ref:
+        return await save_section(request, ref)
+    if name not in PAGE_NAMES:
         raise HTTPException(404)
     form = await request.form()
     errors, entries, values = [], [], {}
     for lang in LANGS:
-        entry = content.get(definition["collection"], lang, name) or new_entry(
-            definition["collection"], lang, name
-        )
+        entry = content.get("pages", lang, name) or new_entry("pages", lang, name)
         values[lang] = {
-            key: str(form.get(f"{lang}_{key}", "")).strip() for key, _ in definition["fields"]
+            "title": str(form.get(f"{lang}_title", "")).strip(),
+            "body": str(form.get(f"{lang}_body", "")).replace("\r\n", "\n"),
         }
-        values[lang]["body"] = str(form.get(f"{lang}_body", "")).replace("\r\n", "\n")
-        for key, _ in definition["fields"]:
-            set_field(entry.data, key, values[lang][key])
-        if definition["body"]:
-            entry.body = values[lang]["body"]
+        entry.data["title"] = values[lang]["title"]
+        entry.body = values[lang]["body"]
         errors += [f"{LANG_NAMES[lang]}: {e}" for e in validation.check_page(entry.data)]
         entries.append(entry)
     if errors:

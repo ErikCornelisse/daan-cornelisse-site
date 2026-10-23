@@ -1,7 +1,8 @@
 ---
 // The heading of a section with its own text and image: image above the
-// text on phones, side by side from 48rem (today's "Over mij"). Without an
-// image the text runs in a single readable column.
+// text on phones, side by side from 48rem (today's "Over mij"), on the left
+// unless the image says right. Without an image the text runs in a single
+// readable column.
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import type { ResolvedSection } from '../lib/page';
@@ -15,7 +16,7 @@ const { title, image } = section.entry.data;
 const { Content } = await render(section.entry);
 ---
 
-<div class:list={['intro', { 'intro--image': image }]}>
+<div class:list={['intro', { 'intro--image': image, 'intro--image-right': image?.position === 'right' }]}>
 	<h2 class="intro__title" id={section.headingId}>{title}</h2>
 	{
 		image && (
@@ -70,6 +71,20 @@ const { Content } = await render(section.entry);
 
 		.intro__image {
 			margin: 0;
+		}
+
+		.intro--image-right {
+			grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+		}
+
+		.intro--image-right .intro__image {
+			grid-column: 2;
+			grid-row: 2;
+		}
+
+		.intro--image-right .intro__text {
+			grid-column: 1;
+			grid-row: 2;
 		}
 	}
 </style>

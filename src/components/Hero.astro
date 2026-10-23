@@ -13,15 +13,25 @@ interface Props {
 }
 
 const { section, linkAnchor } = Astro.props;
-const { title, subtitle, cta, image, portrait } = section.entry.data;
+const { title, subtitle, cta, image, portrait, focus } = section.entry.data;
 const ctaHref = linkAnchor ? `#${linkAnchor}` : undefined;
+// The focal point keeps the subject in view when the wide photo is cropped;
+// on phones it applies only when there is no separate portrait crop.
+const focusStyle = focus
+	? `--focus-wide: ${focus};${portrait ? '' : ` --focus-phone: ${focus};`}`
+	: undefined;
 
 const phone = portrait ?? image?.src;
 const phoneImg = phone && (await getImage({ src: phone, widths: [480, 760], format: 'webp', quality: 72 }));
 const wideImg = image && (await getImage({ src: image.src, widths: [1024, 1600, 2400], format: 'webp', quality: 72 }));
 ---
 
-<section class="hero" aria-labelledby={section.headingId} lang={section.fallback ? section.lang : undefined}>
+<section
+	class="hero"
+	aria-labelledby={section.headingId}
+	lang={section.fallback ? section.lang : undefined}
+	style={focusStyle}
+>
 	{
 		phone && phoneImg && wideImg && (
 			<picture>
@@ -63,7 +73,7 @@ const wideImg = image && (await getImage({ src: image.src, widths: [1024, 1600, 
 		width: 100%;
 		height: clamp(30rem, 88svh, 46rem);
 		object-fit: cover;
-		object-position: 50% 35%;
+		object-position: var(--focus-phone, 50% 35%);
 	}
 
 	/* Darken the top for the text, fade the bottom into the next band */
@@ -123,7 +133,7 @@ const wideImg = image && (await getImage({ src: image.src, widths: [1024, 1600, 
 	@media (min-width: 48rem) {
 		img {
 			height: clamp(28rem, 56vw, 52rem);
-			object-position: 50% 50%;
+			object-position: var(--focus-wide, 50% 50%);
 		}
 
 		h1 {

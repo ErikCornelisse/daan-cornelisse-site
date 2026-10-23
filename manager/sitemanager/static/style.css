@@ -589,3 +589,73 @@ button.danger {
 .band-dot--paper {
 	background: var(--paper);
 }
+
+.focus-picker {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 5.5rem;
+	align-items: start;
+	gap: 1rem;
+}
+
+.focus-picker__image {
+	position: relative;
+	cursor: crosshair;
+	line-height: 0;
+}
+
+.focus-picker__image img {
+	width: 100%;
+	border-radius: var(--radius);
+}
+
+.focus-picker__marker {
+	position: absolute;
+	width: 1.5rem;
+	height: 1.5rem;
+	margin: -0.75rem 0 0 -0.75rem;
+	border: 3px solid #fff;
+	border-radius: 50%;
+	box-shadow: 0 0 0 2px var(--ink);
+	pointer-events: none;
+}
+
+.focus-picker__phone {
+	display: grid;
+	gap: 0.25rem;
+	justify-items: center;
+}
+
+.focus-picker__phone img {
+	width: 5.5rem;
+	aspect-ratio: 9 / 16;
+	object-fit: cover;
+	border: 3px solid var(--ink);
+	border-radius: 0.75rem;
+}
+
+.section-image {
+	max-width: 18rem;
+	border-radius: var(--radius);
+}
+
+.section-image--portrait {
+	max-width: 8rem;
+}
+
+fieldset.choice {
+	display: grid;
+	gap: 0.25rem;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+fieldset.choice legend {
+	margin-bottom: 0.25rem;
+	font-weight: 600;
+}
+
+h3 {
+	margin: 0.5rem 0 0;
+	font-size: 1.05rem;
+}
