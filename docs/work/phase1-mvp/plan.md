@@ -38,7 +38,7 @@ Background, decisions and options: [phase 1 proposal](../analysis/phase1-static-
 | # | Phase | Delivers | Depends on | Status |
 |---|-------|----------|------------|--------|
 | 1 | [Repository and scaffold](phase-01-scaffold.md) | Astro project, GitHub repo, Pages deploy of a placeholder page | — | done (intent.md still open) |
-| 2 | [Tokens, fonts and bands](phase-02-tokens.md) | Design tokens, self-hosted fonts, cream/paper bands, mobile-first base | 1 | in-progress |
+| 2 | [Tokens, fonts and bands](phase-02-tokens.md) | Design tokens, self-hosted fonts, cream/paper bands, mobile-first base | 1 | done |
 | 3 | [i18n skeleton](phase-03-i18n.md) | `/nl/` and `/en/`, root language chooser, switch, hreflang | 2 | todo |
 | 4 | [Hero and header](phase-04-hero.md) | Art-directed hero, header nav, *Mijn verhaal* scroll link | 3 | todo |
 | 5 | [Work blocks](phase-05-works.md) | `works` collection and `WorkBlock` for the three works in both languages | 4 | todo |
