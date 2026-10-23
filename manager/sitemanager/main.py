@@ -1,5 +1,5 @@
 """The site manager web app: overview, editing works, pages and contact data,
-the Astro preview, and publishing."""
+style settings, the Astro preview, and publishing."""
 
 from pathlib import Path
 from urllib.parse import quote
@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from ruamel.yaml.comments import CommentedMap
 from starlette.datastructures import FormData, UploadFile
 
-from . import validation
+from . import style, validation
 from .content import LANGS, PAGE_NAMES, Entry, SiteContent
 from .images import safe_stem, save_upload
 from .publish import Publisher, default_message, latest_deploy, pages_url
@@ -24,6 +24,7 @@ settings = load_settings()
 content = SiteContent(settings.site_root)
 preview = Preview(settings.site_root, settings.preview_port, expose=not settings.is_local_only)
 publisher = Publisher(settings.site_root, author=settings.publish_author)
+style_files = style.StyleFiles(settings.site_root)
 
 app = FastAPI(title="Sitebeheer Daan Cornelisse", docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
@@ -415,6 +416,84 @@ async def save_contact(request: Request):
         )
     content.write_site_data(data)
     return redirect("/contact", "Opgeslagen.")
+
+
+# Style ---------------------------------------------------------------------
+
+
+def works_on_bands() -> list[tuple[str, str, str]]:
+    """(title, accent, band) for each work, with bands alternating as on the page."""
+    result = []
+    for index, pair in enumerate(content.works()):
+        entry = pair["nl"] or pair["en"]
+        band = "paper" if index % 2 else "cream"
+        result.append((str(entry.data.get("title", "")), str(entry.data.get("accent", "")), band))
+    return [w for w in result if w[1] in validation.ACCENTS]
+
+
+def render_style(request: Request, values: dict, errors: list[str], message: str = ""):
+    works = works_on_bands()
+    return templates.TemplateResponse(
+        request,
+        "style.html",
+        {
+            "values": values,
+            "colors": style.COLORS,
+            "scales": style.SCALES,
+            "heading_fonts": style.HEADING_FONTS,
+            "body_fonts": style.BODY_FONTS,
+            "checks": style.contrast_checks(values, works) if not errors else [],
+            "works": works,
+            "fixed_pairs": style.FIXED_PAIRS,
+            "accent_minimum": style.ACCENT_MINIMUM,
+            "scale_number": style.scale_number,
+            "errors": errors,
+            "message": message,
+            "preview_url": preview_url(request),
+        },
+        status_code=422 if errors else 200,
+    )
+
+
+@app.get("/stijl", response_class=HTMLResponse)
+def edit_style(request: Request, bericht: str = ""):
+    return render_style(request, style_files.read(), [], bericht)
+
+
+async def save_style_values(request: Request, submitted: dict):
+    current = style_files.read()
+    values, errors = style.parse_form(submitted, current)
+    if not errors:
+        failing = [c for c in style.contrast_checks(values, works_on_bands()) if not c.ok]
+        errors = [
+            f"{c.label}: contrast {c.ratio:.1f}:1, minimaal {c.minimum:g}:1 nodig." for c in failing
+        ]
+    if errors:
+        return render_style(request, current | {k: v for k, v in submitted.items()}, errors)
+    style_files.write(values)
+    return redirect("/stijl", "Opgeslagen. Het voorbeeld laat de nieuwe stijl direct zien.")
+
+
+@app.post("/stijl", response_class=HTMLResponse)
+async def save_style(request: Request):
+    form = await request.form()
+    return await save_style_values(request, {k: str(v) for k, v in form.items()})
+
+
+@app.post("/stijl/standaard", response_class=HTMLResponse)
+async def reset_style(request: Request):
+    defaults = dict(style.DEFAULTS)
+    for scale in style.SCALES:
+        defaults[scale.token] = str(style.scale_number(defaults[scale.token]))
+    return await save_style_values(request, defaults)
+
+
+@app.get("/lettertype/{key}.woff2")
+def font_sample(key: str):
+    path = style.font_file(settings.site_root, key)
+    if not path:
+        raise HTTPException(404)
+    return FileResponse(path, media_type="font/woff2")
 
 
 # Publishing ----------------------------------------------------------------

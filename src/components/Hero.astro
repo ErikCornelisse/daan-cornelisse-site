@@ -46,7 +46,7 @@ const wideImg = await getImage({ src: wide, widths: [1024, 1600, 2400], format: 
 		position: relative;
 		isolation: isolate;
 		overflow: hidden;
-		background: #1a1a14;
+		background: var(--color-dark);
 		color: var(--color-on-photo);
 	}
 
@@ -81,7 +81,7 @@ const wideImg = await getImage({ src: wide, widths: [1024, 1600, 2400], format: 
 	.hero::after {
 		bottom: -1px;
 		height: 22%;
-		background: linear-gradient(to bottom, rgb(255 221 163 / 0), var(--color-cream) 92%);
+		background: linear-gradient(to bottom, transparent, var(--color-cream) 92%);
 	}
 
 	.hero__text {

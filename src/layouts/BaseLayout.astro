@@ -1,11 +1,5 @@
 ---
-// Latin subsets only: covers Dutch and English, keeps the CSS small.
-import '@fontsource/belleza/latin-400.css';
-import '@fontsource/source-serif-4/latin-400.css';
-import '@fontsource/source-serif-4/latin-400-italic.css';
-import '@fontsource/source-serif-4/latin-700.css';
-import headingFont from '@fontsource/belleza/files/belleza-latin-400-normal.woff2?url';
-import bodyFont from '@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff2?url';
+import { preloadFonts } from '../styles/fonts';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
@@ -46,8 +40,7 @@ const ogImage = new URL(`${base}og-image.jpg`, Astro.site).href;
 		{alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
 		{alternates.length > 0 && <link rel="alternate" hreflang="x-default" href={rootUrl} />}
 
-		<link rel="preload" href={headingFont} as="font" type="font/woff2" crossorigin />
-		<link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin />
+		{preloadFonts.map((font) => <link rel="preload" href={font} as="font" type="font/woff2" crossorigin />)}
 
 		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
 		<link rel="icon" href={`${base}favicon.ico`} sizes="32x32" />

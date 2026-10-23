@@ -48,7 +48,7 @@ Background: the options and choice are in the advice of 2026-10-23
 | 2 | Content editing and preview | Edit works (nl/en side by side), page texts and contact data; image upload; validation; start/stop the Astro preview | 1 | done |
 | 3 | Publish to GitHub Pages | Change list, check + build, commit and push, deploy status | 2 | done |
 | 4 | Translation | "Translate to English" per work/page via Ollama; draft/reviewed status; outdated-translation warnings | 2 | todo |
-| 5 | Style | Colours with contrast check, fonts, type and spacing sizes; preview | 2 | todo |
+| 5 | Style | Colours with contrast check, fonts, type and spacing sizes; preview | 2 | done |
 | 6 | Service on the Mac mini | launchd agent, install and update instructions, Tailscale access notes | 3 | todo |
 | 7 | Production deploy | SFTP deploy workflow to mijndomein, triggered and followed from the manager | 3, site phase 1 step 8 | todo |
 | 8 | Image sizes | Size settings for work and portrait images | 5 | todo |
@@ -82,7 +82,14 @@ for progress.
 - [x] Deploy status of the latest GitHub Actions run, refreshed until finished (public API, no login)
 - [x] Optional commit author (`PUBLISH_AUTHOR`)
 
-## Phases 4–8
+## Phase 5 — Style
+
+- [x] Site: `--color-dark` token instead of hard-coded colours, size factors (`--scale-text`, `--scale-heading`, `--scale-space`) in the type and spacing scales, fonts loaded from `src/styles/fonts.ts` — _done when:_ the built site is unchanged at the default values
+- [x] Font list of free Fontsource fonts, all installed as dependencies so publishing needs no `npm install` — _done when:_ unused fonts do not appear in the build
+- [x] Stijl screen: colours, fonts with samples, sizes; live contrast check; server-side check blocks unreadable combinations — _done when:_ a title colour that fails on its band is refused
+- [x] Restore the original style — _done when:_ tokens and fonts module are identical to the originals
+
+## Phases 4, 6–8
 Detailed when the previous phase is done.
 
 ## Open questions
@@ -91,3 +98,6 @@ Detailed when the previous phase is done.
 2. Translation quality and speed of `qwen3.6:35b-mlx` on the Mac mini: to be
    measured in phase 4; which model is installed there?
 3. SFTP host, user and target folder at mijndomein (phase 7).
+4. The vase illustration (`vaas-masker.png`) has the cream background baked
+   in; ask Daan for a version with a transparent background so a changed
+   background colour does not show a block around it.

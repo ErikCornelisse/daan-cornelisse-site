@@ -19,7 +19,7 @@ interfaces.
 Requirements: [uv](https://docs.astral.sh/uv/), Node 22.23+ with the site's
 dependencies installed (`npm install` in the repository root) for the preview.
 
-## What it does (phases 1–3)
+## What it does (phases 1, 2, 3 and 5)
 
 | Screen | Edits |
 |---|---|
@@ -27,6 +27,7 @@ dependencies installed (`npm install` in the repository root) for the preview.
 | Werken | Accent colour, order, 1–2 images (upload, replace, remove, alt text per language), and title, discipline, quote and text in Dutch and English side by side; "Nieuw werk" adds one |
 | Pagina's | Opening image texts, About, Contact and Privacy in both languages |
 | Contact & links | E-mail address, Instagram, Spotify and LinkedIn links, Web3Forms key |
+| Stijl | Colours, heading and body font, text, heading and spacing size, content width; live contrast check; restore the original style |
 | Publiceren | Lists unpublished content changes (each can be undone), checks and builds the site, commits only the content files, pulls in changes from GitHub, pushes, and follows the GitHub Pages deploy |
 
 Edits are written straight into `src/content/`, `src/data/site.json` and
@@ -51,8 +52,29 @@ The Mac running the manager needs:
 - optionally `PUBLISH_AUTHOR="Daan Cornelisse <…>"` in `.env` to record Daan
   as the author of the commits.
 
-Translation, style editing and the production deploy follow in phases 4–7
-of the plan.
+### Style
+
+*Stijl* edits only whitelisted values in `src/styles/tokens.css`, line by
+line, so its comments and everything else stay untouched:
+
+- colours (`--color-*`), checked for contrast before saving: body text
+  4.5:1 on cream and paper, footer text 4.5:1 on dark, the button label 3:1,
+  and every work title 3:1 on the band it actually sits on (bands alternate
+  in the order of the works);
+- fonts from a fixed list of free, self-hosted Fontsource fonts (headings:
+  Belleza, Tenor Sans, Marcellus; text: Source Serif 4, Libre Caslon Text,
+  Crimson Pro, EB Garamond). All are installed as site dependencies; only the
+  chosen ones end up in the built site. Choosing one rewrites
+  `src/styles/fonts.ts` together with the `--font-*` values;
+- size factors `--scale-text`, `--scale-heading`, `--scale-space` (shown as
+  percentages) and `--container` (content width).
+
+Images with a background colour baked in (such as the current vase
+illustration on cream) show as a block when the background colour changes;
+such images should have a transparent background.
+
+Translation and the production deploy follow in phases 4, 6 and 7 of the
+plan.
 
 ## Structure
 
@@ -63,6 +85,7 @@ of the plan.
 | `sitemanager/validation.py` | Checks mirroring `src/content.config.ts`; keep the two in step |
 | `sitemanager/images.py` | Image uploads: format check, orientation, scaled to max 2400 px |
 | `sitemanager/site_tools.py` | Git status and the Astro preview |
+| `sitemanager/style.py` | Style tokens, font list, contrast rules, defaults |
 | `sitemanager/publish.py` | Check, commit, pull, push, undo, and the GitHub deploy status |
 | `sitemanager/main.py` | FastAPI routes; templates in `templates/`, CSS in `static/` |
 

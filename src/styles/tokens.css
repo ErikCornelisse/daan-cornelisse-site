@@ -1,6 +1,8 @@
 /*
  * Design tokens. Every colour, font and size used in components comes from
  * here, so refining the style or swapping a font means editing this file.
+ * The site manager (Stijl) edits the values below; the fonts themselves are
+ * loaded in fonts.ts, so change a --font-* value and that file together.
  *
  * Colours are sampled from docs/work/design/mockup v1.png.
  * Breakpoints (media queries cannot read custom properties):
@@ -9,19 +11,19 @@
  */
 
 :root {
-	/* Backgrounds */
+	/* Backgrounds; dark is behind the hero photo and in the footer */
 	--color-cream: #ffdda3;
 	--color-paper: #b9a47a;
+	--color-dark: #1a1a14;
 
 	/* Text */
 	--color-ink: #111111;
 	--color-on-photo: #ffdda3;
 
 	/* Accent colours for work titles. Titles are large text, so they need a
-	   contrast of at least 3:1 with their band (WCAG AA):
-	     purple on cream 4.4   orange on cream 3.4   brown on paper 4.6
-	   The mockup's lighter orange (#d68641, 2.2:1) and white on paper
-	   (2.4:1) fall short. */
+	   contrast of at least 3:1 with the band they are on (WCAG AA); the site
+	   manager checks this. The mockup's lighter orange (#d68641) and white
+	   on paper fall short. */
 	--color-accent-purple: #6e5f85;
 	--color-accent-orange: #b56424;
 	--color-accent-brown: #5b2f1a;
@@ -34,24 +36,30 @@
 	--font-heading: 'Belleza', Optima, Candara, 'Segoe UI', sans-serif;
 	--font-body: 'Source Serif 4', 'Times New Roman', Times, serif;
 
-	/* Fluid type scale: 375 px → 1440 px viewport */
-	--step--1: clamp(0.875rem, 0.84rem + 0.15vw, 0.95rem);
-	--step-0: clamp(1.0625rem, 1.02rem + 0.19vw, 1.1875rem);
-	--step-1: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
-	--step-2: clamp(1.5rem, 1.31rem + 0.85vw, 2.1rem);
-	--step-3: clamp(1.85rem, 1.5rem + 1.5vw, 2.9rem);
-	--step-4: clamp(2.2rem, 1.65rem + 2.4vw, 3.9rem);
+	/* Size factors (1 = as designed), set in the site manager */
+	--scale-text: 1;
+	--scale-heading: 1;
+	--scale-space: 1;
+
+	/* Fluid type scale: 375 px → 1440 px viewport. Steps -1 to 1 are body
+	   text sizes, 2 to 4 heading sizes. */
+	--step--1: calc(clamp(0.875rem, 0.84rem + 0.15vw, 0.95rem) * var(--scale-text));
+	--step-0: calc(clamp(1.0625rem, 1.02rem + 0.19vw, 1.1875rem) * var(--scale-text));
+	--step-1: calc(clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem) * var(--scale-text));
+	--step-2: calc(clamp(1.5rem, 1.31rem + 0.85vw, 2.1rem) * var(--scale-heading));
+	--step-3: calc(clamp(1.85rem, 1.5rem + 1.5vw, 2.9rem) * var(--scale-heading));
+	--step-4: calc(clamp(2.2rem, 1.65rem + 2.4vw, 3.9rem) * var(--scale-heading));
 
 	--leading-body: 1.5;
 	--leading-heading: 1.15;
 
 	/* Spacing scale */
-	--space-2xs: 0.25rem;
-	--space-xs: 0.5rem;
-	--space-s: 1rem;
-	--space-m: 1.5rem;
-	--space-l: clamp(2rem, 1.6rem + 1.8vw, 3rem);
-	--space-xl: clamp(3rem, 2.3rem + 3vw, 5rem);
+	--space-2xs: calc(0.25rem * var(--scale-space));
+	--space-xs: calc(0.5rem * var(--scale-space));
+	--space-s: calc(1rem * var(--scale-space));
+	--space-m: calc(1.5rem * var(--scale-space));
+	--space-l: calc(clamp(2rem, 1.6rem + 1.8vw, 3rem) * var(--scale-space));
+	--space-xl: calc(clamp(3rem, 2.3rem + 3vw, 5rem) * var(--scale-space));
 
 	/* Layout */
 	--container: 68rem;

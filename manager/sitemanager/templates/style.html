@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Stijl{% endblock %}
+{% block content %}
+<style>
+	{% for font in heading_fonts + body_fonts %}
+	@font-face {
+		font-family: 'sample-{{ font.key }}';
+		src: url('/lettertype/{{ font.key }}.woff2') format('woff2');
+		font-display: swap;
+	}
+	{% endfor %}
+</style>
+
+<p class="crumbs"><a href="/">Overzicht</a> › Stijl</p>
+<div class="page-head">
+	<h1>Stijl</h1>
+	<a href="{{ preview_url }}" target="_blank" rel="noopener">Bekijk in voorbeeld</a>
+</div>
+<p class="hint">Wijzigingen zijn na <em>Opslaan</em> meteen in het voorbeeld te zien en gaan pas online bij Publiceren.
+	Tekst moet goed leesbaar blijven: kleuren met te weinig contrast worden niet opgeslagen.</p>
+
+<form method="post" action="/stijl" class="stack" id="style-form">
+	<div class="languages">
+		<section class="card">
+			<h2>Kleuren</h2>
+			{% for token, label in colors %}
+			<label class="color-row">
+				<input type="color" name="{{ token }}" value="{{ values[token] }}" data-token="{{ token }}">
+				<span>{{ label }}<br><code class="hint" data-hex="{{ token }}">{{ values[token] }}</code></span>
+			</label>
+			{% endfor %}
+		</section>
+
+		<section class="card">
+			<h2>Leesbaarheid</h2>
+			<p class="hint">Gewone tekst heeft minstens 4,5:1 contrast nodig, koppen en de knop 3:1 (WCAG AA).</p>
+			<ul class="checks" id="checks">
+				{% for check in checks %}
+				<li class="{{ 'ok' if check.ok else 'failed' }}">{{ "✓" if check.ok else "✗" }} {{ check.label }}:
+					{{ ("%.1f"|format(check.ratio))|replace(".", ",") }}:1</li>
+				{% endfor %}
+			</ul>
+		</section>
+	</div>
+
+	<section class="card">
+		<h2>Lettertypen</h2>
+		<div class="languages">
+			<fieldset class="font-choice">
+				<legend>Koppen</legend>
+				{% if not values['font-heading'] %}<p class="hint">Nu met de hand ingesteld; kies er een om het te vervangen.</p>{% endif %}
+				{% for font in heading_fonts %}
+				<label class="font-option">
+					<input type="radio" name="font-heading" value="{{ font.key }}" {% if values['font-heading'] == font.key %}checked{% endif %}>
+					<span class="font-sample font-sample--heading" style="font-family: 'sample-{{ font.key }}', sans-serif">Een kijkje in mijn hoofd</span>
+					<span class="hint">{{ font.label }}</span>
+				</label>
+				{% endfor %}
+			</fieldset>
+			<fieldset class="font-choice">
+				<legend>Tekst</legend>
+				{% if not values['font-body'] %}<p class="hint">Nu met de hand ingesteld; kies er een om het te vervangen.</p>{% endif %}
+				{% for font in body_fonts %}
+				<label class="font-option">
+					<input type="radio" name="font-body" value="{{ font.key }}" {% if values['font-body'] == font.key %}checked{% endif %}>
+					<span class="font-sample" style="font-family: 'sample-{{ font.key }}', serif">Wat je van de buitenkant ziet is maar een klein gedeelte van iemands verhaal.</span>
+					<span class="hint">{{ font.label }}</span>
+				</label>
+				{% endfor %}
+			</fieldset>
+		</div>
+	</section>
+
+	<section class="card">
+		<h2>Afmetingen</h2>
+		{% for scale in scales %}
+		{% set number = scale_number(values[scale.token]) %}
+		<label>{{ scale.label }}
+			<span class="range-row">
+				<input type="range" name="{{ scale.token }}" min="{{ scale.minimum }}" max="{{ scale.maximum }}"
+					step="{{ scale.step }}" value="{{ number }}" data-unit="{{ scale.unit }}">
+				<output>{{ number ~ " rem" if scale.unit else (number * 100)|round|int ~ "%" }}</output>
+			</span>
+		</label>
+		{% endfor %}
+	</section>
+
+	<div class="actions">
+		<button>Opslaan</button>
+		<a href="/">Annuleren</a>
+	</div>
+</form>
+
+<form method="post" action="/stijl/standaard" class="reset-form"
+	onsubmit="return confirm('Alle kleuren, lettertypen en afmetingen terugzetten naar de oorspronkelijke stijl?')">
+	<button class="secondary">Oorspronkelijke stijl herstellen</button>
+</form>
+
+<script>
+	// Live contrast check while colours are being chosen; the server checks again on save.
+	const pairs = {{ fixed_pairs | tojson }}.map(([fg, bg, min, label]) => ({ fg, bg, min, label }));
+	const works = {{ works | tojson }}.map(([title, accent, band]) => ({
+		fg: `color-accent-${accent}`,
+		bg: `color-${band}`,
+		min: {{ accent_minimum }},
+		label: `Titel “${title}” op ${band === 'cream' ? 'crème' : 'papier'}`,
+	}));
+	const form = document.getElementById('style-form');
+	const list = document.getElementById('checks');
+
+	function luminance(hex) {
+		const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+			.map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+		return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+	}
+	function ratio(a, b) {
+		const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+		return (hi + 0.05) / (lo + 0.05);
+	}
+	function color(token) {
+		return form.querySelector(`[data-token="${token}"]`).value;
+	}
+	function update() {
+		list.replaceChildren(...[...pairs, ...works].map((check) => {
+			const value = ratio(color(check.fg), color(check.bg));
+			const item = document.createElement('li');
+			const ok = value >= check.min;
+			item.className = ok ? 'ok' : 'failed';
+			item.textContent = `${ok ? '✓' : '✗'} ${check.label}: ${value.toFixed(1).replace('.', ',')}:1`;
+			return item;
+		}));
+		for (const input of form.querySelectorAll('[data-token]')) {
+			form.querySelector(`[data-hex="${input.dataset.token}"]`).textContent = input.value;
+		}
+	}
+	form.addEventListener('input', (event) => {
+		if (event.target.type === 'range') {
+			const unit = event.target.dataset.unit;
+			const number = Number(event.target.value);
+			event.target.nextElementSibling.textContent = unit ? `${number} ${unit}` : `${Math.round(number * 100)}%`;
+		}
+		update();
+	});
+	update();
+</script>
+{% endblock %}
