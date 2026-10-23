@@ -1,10 +1,10 @@
 {
-	"_comment": "Contact details and links. The e-mail address and profile URLs are placeholders until Daan supplies them. The Web3Forms access key is public by design; leave it empty to show the form without sending.",
-	"email": "daan@example.com",
+	"_comment": "Contact details and links, taken from daniel-cornelisse.nl (May 2024). The Web3Forms access key is public by design; leave it empty to show the form without sending.",
+	"email": "danielcornelis.nl@gmail.com",
 	"social": {
-		"instagram": "https://www.instagram.com/",
-		"youtube": "https://www.youtube.com/",
-		"linkedin": "https://www.linkedin.com/"
+		"instagram": "https://www.instagram.com/daancornelisse/",
+		"spotify": "https://open.spotify.com/artist/7dPe6JDh0Z6esY8hMY0Mtp",
+		"linkedin": "https://www.linkedin.com/in/cornelissedaan/"
 	},
 	"contactForm": {
 		"endpoint": "https://api.web3forms.com/submit",

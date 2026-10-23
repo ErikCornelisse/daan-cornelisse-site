@@ -1,6 +1,6 @@
 ---
-# Draft for Daan to review; not legal advice. Update the e-mail address, the
-# host (GitHub Pages now, mijndomein.nl in production) and the date before launch.
+# Draft for Daan to review; not legal advice. Update the host (GitHub Pages now,
+# mijndomein.nl in production) and the date before launch.
 title: Privacyverklaring
 ---
 Deze website is van Daan Cornelisse. Hieronder lees je welke gegevens de site verwerkt en waarom.
@@ -11,7 +11,7 @@ Als je het contactformulier gebruikt, gaan je naam, e-mailadres en bericht via d
 
 ## Geen cookies, geen tracking
 
-De site gebruikt geen cookies, geen statistieken of advertentiediensten en laadt geen inhoud van sociale media. Lettertypen en afbeeldingen komen van de site zelf. Links naar Instagram, YouTube en LinkedIn zijn gewone links: pas als je erop klikt, kom je bij die diensten terecht en gelden hun voorwaarden.
+De site gebruikt geen cookies, geen statistieken of advertentiediensten en laadt geen inhoud van sociale media. Lettertypen en afbeeldingen komen van de site zelf. Links naar Instagram, Spotify en LinkedIn zijn gewone links: pas als je erop klikt, kom je bij die diensten terecht en gelden hun voorwaarden.
 
 ## Taalkeuze
 

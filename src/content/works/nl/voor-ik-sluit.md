@@ -1,5 +1,5 @@
 ---
-# Placeholder text from mockup v1; Daan supplies the final text.
+# Text from daniel-cornelisse.nl (work.html and about.html, May 2024), in the past tense.
 title: Voor ik sluit
 discipline: Digitale kunst
 accent: orange
@@ -8,6 +8,6 @@ images:
   - src: ../../../assets/images/works/voor-ik-sluit.jpg
     alt: Digitaal kunstwerk van rode, groene en blauwe lijnen die uitwaaieren vanuit een donker middelpunt.
 ---
-Voor een uitzending om meer bewustwording rondom epilepsie te creëren vroeg EpilepsieNL mij één van mijn pianostukken te spelen. Het stuk “Yesterday is gone” schreef ik ’s avonds nadat ik een hevige aanval had gehad en weerspiegelt de vergankelijkheid van tijd.
+Als ervaringsdeskundige en kunstenaar ben ik gevraagd een werk te maken voor een museumtentoonstelling over epilepsie. Het kunstwerk “Voor ik sluit” was van maart tot mei 2024 te zien in de tentoonstelling “Onzichtbaar Verlies” in het Beautiful Distress House in Amsterdam.
 
-Voor een uitzending om meer bewustwording rondom epilepsie te creëren vroeg EpilepsieNL mij één van mijn pianostukken te spelen. Het stuk “Yesterday is gone” schreef ik ’s avonds nadat ik een hevige aanval had gehad en weerspiegelt de vergankelijkheid van tijd.
+“Onzichtbaar Verlies” staat stil bij de stigma’s en onzekerheden rondom de aandoening epilepsie. Een onderwerp dat dicht bij mijzelf ligt, omdat ik er al mijn hele leven last van ervaar.

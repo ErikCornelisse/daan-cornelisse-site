@@ -1,5 +1,5 @@
 ---
-# Placeholder text; Daan supplies the final text.
+# Text from daniel-cornelisse.nl/contact.html (May 2024).
 title: Contact
 ---
-Wil je meer weten over mijn werk, een opdracht bespreken of samenwerken? Stuur me een bericht via het formulier of mail me rechtstreeks. Je kunt me ook volgen op Instagram, YouTube en LinkedIn.
+Ben je op zoek naar grafische ontwerpen, creatief advies of heb je een eigen verzoek? Neem dan gerust contact met me op.

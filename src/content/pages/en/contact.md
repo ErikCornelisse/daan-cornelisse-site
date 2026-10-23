@@ -1,5 +1,5 @@
 ---
-# Placeholder text; Daan supplies the final text.
+# Draft translation of daniel-cornelisse.nl/contact.html; for Daan to review.
 title: Contact
 ---
-Would you like to know more about my work, discuss a commission or work together? Send me a message with the form or e-mail me directly. You can also follow me on Instagram, YouTube and LinkedIn.
+Looking for graphic design, creative advice or do you have a request of your own? Feel free to get in touch.

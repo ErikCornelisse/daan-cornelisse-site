@@ -1,6 +1,6 @@
 ---
-# Draft for Daan to review; not legal advice. Update the e-mail address, the
-# host (GitHub Pages now, mijndomein.nl in production) and the date before launch.
+# Draft for Daan to review; not legal advice. Update the host (GitHub Pages now,
+# mijndomein.nl in production) and the date before launch.
 title: Privacy statement
 ---
 This website belongs to Daan Cornelisse. Below you can read which data the site processes and why.
@@ -11,7 +11,7 @@ When you use the contact form, your name, e-mail address and message are sent to
 
 ## No cookies, no tracking
 
-The site uses no cookies, no analytics or advertising services, and loads no content from social media. Fonts and images come from the site itself. The links to Instagram, YouTube and LinkedIn are plain links: only when you click one do you reach that service, and its own terms apply.
+The site uses no cookies, no analytics or advertising services, and loads no content from social media. Fonts and images come from the site itself. The links to Instagram, Spotify and LinkedIn are plain links: only when you click one do you reach that service, and its own terms apply.
 
 ## Language choice
 

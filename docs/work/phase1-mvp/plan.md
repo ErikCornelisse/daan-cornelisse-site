@@ -54,6 +54,6 @@ for progress.
 2. Form service (Web3Forms or Formspree) and the address that receives the
    messages. Needed for phase 6; the form can ship disabled until then.
 3. Who writes the English texts: Daan, or Claude drafts and Daan checks.
-4. Daan's e-mail address and Instagram, YouTube and LinkedIn URLs (placeholders until known).
+4. ~~Daan's e-mail address and profile URLs.~~ Resolved from daniel-cornelisse.nl: e-mail, Instagram, Spotify and LinkedIn (Spotify replaces YouTube).
 5. ~~Daan's mijndomein package.~~ Resolved: Plesk Linux web hosting at mijndomein for `daniel-cornelisse.nl`, currently serving a static site; see [current site](../analysis/current-site-20261023.md). Login details still needed for step 8.
 6. Permission for the MAX/EpilepsieNL TV still, or a replacement image.
